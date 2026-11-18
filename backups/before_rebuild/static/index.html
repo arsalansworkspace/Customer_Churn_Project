@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChurnGuard AI | Retention & Analytics Intelligence</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Color palette and font are set here so the whole page stays consistent
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Manrope', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+                    colors: {
+                        ink:   { 950: '#070C16', 900: '#0B1220', 800: '#101A2D', 700: '#17233B', 600: '#22314F' },
+                        brand: { 300: '#7EE7DA', 400: '#2DD4BF', 500: '#14B8A6', 600: '#0D9488' },
+                        mist:  { 100: '#E8EEF8', 300: '#B3C0D6', 400: '#8A9BB5', 500: '#64748B' },
+                        risk:  { low: '#34D399', mid: '#FBBF24', high: '#FB7185' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Chart.js CDN for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            background-image:
+                radial-gradient(60rem 30rem at 10% -10%, rgba(45, 212, 191, 0.08), transparent 60%),
+                radial-gradient(50rem 28rem at 100% 0%, rgba(56, 130, 246, 0.07), transparent 60%);
+            background-attachment: fixed;
+        }
+        /* Clear keyboard focus for accessibility */
+        :focus-visible { outline: 2px solid #2DD4BF; outline-offset: 2px; }
+        /* Remove number spinners for a cleaner look */
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+        .num { font-variant-numeric: tabular-nums; }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation: none !important; transition: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-ink-950 text-mist-100 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Top Navigation -->
+    <header class="border-b border-ink-600/70 bg-ink-900/70 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-br from-brand-400 to-brand-600 p-2 rounded-xl text-ink-950 shadow-lg shadow-brand-500/20">
+                    <i data-lucide="shield-alert" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg tracking-tight text-white leading-tight">ChurnGuard <span class="text-brand-400">AI</span></h1>
+                    <p class="text-xs text-mist-400 hidden sm:block">Customer Retention & Risk Intelligence Dashboard</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-300 border border-emerald-400/25">
+                    <span class="w-2 h-2 mr-2 bg-emerald-400 rounded-full animate-pulse"></span> FastAPI Backend Online
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Intro: what this tool does and how to use it -->
+    <section class="max-w-7xl mx-auto px-6 pt-8 w-full">
+        <div class="rounded-2xl border border-ink-600/70 bg-ink-800/60 p-6">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div class="max-w-xl">
+                    <h2 class="text-xl font-bold text-white">Find out which customers are about to leave</h2>
+                    <p class="mt-1.5 text-sm text-mist-300 leading-relaxed">
+                        Enter a customer's details and the model tells you how likely they are to cancel. Use the result to decide who needs a call, an offer, or extra support.
+                    </p>
+                </div>
+                <ol class="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:w-[34rem]">
+                    <li class="flex items-start gap-3 rounded-xl bg-ink-900/70 border border-ink-600/60 p-3">
+                        <span class="shrink-0 p-2 rounded-lg bg-brand-400/10 text-brand-400"><i data-lucide="clipboard-list" class="w-4 h-4"></i></span>
+                        <span class="text-xs text-mist-300"><span class="block font-semibold text-white mb-0.5">Step 1</span>Fill in the customer profile</span>
+                    </li>
+                    <li class="flex items-start gap-3 rounded-xl bg-ink-900/70 border border-ink-600/60 p-3">
+                        <span class="shrink-0 p-2 rounded-lg bg-brand-400/10 text-brand-400"><i data-lucide="zap" class="w-4 h-4"></i></span>
+                        <span class="text-xs text-mist-300"><span class="block font-semibold text-white mb-0.5">Step 2</span>Click Run Churn Prediction</span>
+                    </li>
+                    <li class="flex items-start gap-3 rounded-xl bg-ink-900/70 border border-ink-600/60 p-3">
+                        <span class="shrink-0 p-2 rounded-lg bg-brand-400/10 text-brand-400"><i data-lucide="gauge" class="w-4 h-4"></i></span>
+                        <span class="text-xs text-mist-300"><span class="block font-semibold text-white mb-0.5">Step 3</span>Read the risk level and reasons</span>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Dashboard Container -->
+    <main class="max-w-7xl mx-auto px-6 py-8 flex-grow grid grid-cols-1 lg:grid-cols-1 gap-8 w-full">
+
+        <!-- Prediction Result Card -->
+<div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+    <div>
+        <h3 class="text-sm font-medium text-slate-400 mb-4 flex items-center gap-2">
+            <i data-lucide="activity" class="w-4 h-4 text-indigo-400"></i> Real-Time Inference Result
+        </h3>
+        
+        <div id="resultCard" class="bg-slate-950 border border-slate-800 rounded-xl p-6 text-center mb-4">
+            <div id="riskBadge" class="inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-3 bg-slate-800 text-slate-400">
+                Awaiting Prediction
+            </div>
+            <div id="probValue" class="text-4xl font-black text-white tracking-tight mb-1">--%</div>
+            <p id="predText" class="text-xs text-slate-400">Submit a customer profile on the left to evaluate retention probability.</p>
+        </div>
+
+        <!-- Prescriptive Recommendation Box -->
+        <div id="actionBox" class="bg-indigo-950/30 border border-indigo-500/20 rounded-xl p-4 hidden">
+            <div class="flex items-center gap-2 text-indigo-400 text-xs font-semibold mb-1">
+                <i data-lucide="lightbulb" class="w-4 h-4"></i> Prescriptive Action Recommendation
+            </div>
+            <p id="actionText" class="text-xs text-slate-300 leading-relaxed"></p>
+        </div>
+    </div>
+
+    <div class="mt-4 pt-4 border-t border-slate-800/60 text-xs text-slate-500 flex justify-between">
+        <span>Model: XGBoost Classifier</span>
+        <span>Explainability: SHAP Engine</span>
+    </div>
+</div>
+
+        <!-- Left Column: Customer Scoring Form (1 Span) -->
+        <section class="bg-ink-800/80 border border-ink-600/70 rounded-2xl p-6 shadow-xl shadow-black/20 flex flex-col justify-between">
+            <div>
+                <div class="flex space-x-4 justify-between gap-3 mb-6">
+                    <div>
+                        <h2 class="text-lg font-bold flex items-center gap-2 text-white">
+                            <i data-lucide="user-check" class="w-5 h-5 text-brand-400"></i> Customer Profile Scoring
+                        </h2>
+                        <p class="text-xs text-mist-400 mt-1">Start with the sample, then change the values.</p>
+                    </div>
+                    <button onclick="fillSampleData('high')" class="shrink-0 inline-flex items-center gap-1.5 text-xs font-semibold bg-ink-700 hover:bg-ink-600 text-brand-300 px-3 py-1.5 rounded-lg transition border border-ink-600">
+                        <i data-lucide="wand-sparkles" class="w-3.5 h-3.5"></i> High-Risk Sample
+                    </button>
+                </div>
+
+                <form id="churnForm" class="space-y-6">
+
+                    <!-- Group 1: Account -->
+                    <fieldset class="space-y-4">
+                        <legend class="flex items-center gap-2 text-xs font-bold text-brand-300 mb-3">
+                            <i data-lucide="calendar-clock" class="w-4 h-4"></i> Account
+                        </legend>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="tenure" class="block text-xs font-semibold text-mist-300 mb-1.5">Tenure (Months)</label>
+                                <input type="number" id="tenure" value="4" class="num w-full bg-ink-950 border border-ink-600 rounded-xl px-3 py-2.5 text-sm text-white placeholder-mist-500 focus:outline-none focus:border-brand-400 focus:ring-1 focus:ring-brand-400/40 transition" required>
+                                <p class="text-[11px] text-mist-500 mt-1.5 leading-snug">How long they have been a customer. New customers leave more often.</p>
+                            </div>
+                            <div>
+                                <label for="Contract" class="block text-xs font-semibold text-mist-300 mb-1.5">Contract Type</label>
+                                <select id="Contract" class="w-full bg-ink-950 border border-ink-600 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-400 focus:ring-1 focus:ring-brand-400/40 transition">
+                                    <option value="0">Month-to-Month</option>
+                                    <option value="1">One Year</option>
+                                    <option value="2">Two Year</option>
+                                </select>
+                                <p class="text-[11px] text-mist-500 mt-1.5 leading-snug">Longer contracts usually mean lower risk.</p>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Group 2: Billing -->
+                    <fieldset class="space-y-4 pt-5 border-t border-ink-600/60">
+                        <legend class="flex items-center gap-2 text-xs font-bold text-brand-300 mb-3">
+                            <i data-lucide="wallet" class="w-4 h-4"></i> Billing
+                        </legend>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="MonthlyCharges" class="block text-xs font-semibold text-mist-300 mb-1.5">Monthly Charges ($)</label>
+                                <div class="relative">
+                                    <i data-lucide="dollar-sign" class="w-4 h-4 text-mist-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                                    <input type="number" step="0.01" id="MonthlyCharges" value="89.50" class="num w-full bg-ink-950 border border-ink-600 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-400 focus:ring-1 focus:ring-brand-400/40 transition" required>
+                                </div>
+                                <p class="text-[11px] text-mist-500 mt-1.5 leading-snug">What they pay each month.</p>
+                            </div>
+                            <div>
+                                <label for="TotalCharges" class="block text-xs font-semibold text-mist-300 mb-1.5">Total Charges ($)</label>
+                                <div class="relative">
+                                    <i data-lucide="dollar-sign" class="w-4 h-4 text-mist-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                                    <input type="number" step="0.01" id="TotalCharges" value="358.00" class="num w-full bg-ink-950 border border-ink-600 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-400 focus:ring-1 focus:ring-brand-400/40 transition" required>
+                                </div>
+                                <p class="text-[11px] text-mist-500 mt-1.5 leading-snug">Everything they have paid so far.</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="PaymentMethod" class="block text-xs font-semibold text-mist-300 mb-1.5">Payment Method</label>
+                            <select id="PaymentMethod" class="w-full bg-ink-950 border border-ink-600 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-400 focus:ring-1 focus:ring-brand-400/40 transition">
+                                <option value="2">Electronic Check</option>
+                                <option value="0">Bank Transfer</option>
+                                <option value="1">Credit Card</option>
+                                <option value="3">Mailed Check</option>
+                            </select>
+                            <p class="text-[11px] text-mist-500 mt-1.5 leading-snug">Customers who pay by electronic check tend to leave more often.</p>
+                        </div>
+                    </fieldset>
+
+                    <!-- Group 3: Services -->
+                    <fieldset class="space-y-4 pt-5 border-t border-ink-600/60">
+                        <legend class="flex items-center gap-2 text-xs font-bold text-brand-300 mb-3">
+                            <i data-lucide="wifi" class="w-4 h-4"></i> Services
+                        </legend>
+                        <div>
+                            <label for="InternetService" class="block text-xs font-semibold text-mist-300 mb-1.5">Internet Service</label>
+                            <select id="InternetService" class="w-full bg-ink-950 border border-ink-600 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-400 focus:ring-1 focus:ring-brand-400/40 transition">
+                                <option value="1">Fiber Optic</option>
+                                <option value="0">DSL</option>
+                                <option value="2">No</option>
+                            </select>
+                            <p class="text-[11px] text-mist-500 mt-1.5 leading-snug">The type of internet plan the customer has.</p>
+                        </div>
+
+                        <!-- Additional binary flags simplified for demo -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <label for="SeniorCitizen" class="flex items-center gap-2.5 text-xs font-medium text-mist-300 bg-ink-950 border border-ink-600 rounded-xl px-3 py-2.5 cursor-pointer hover:border-brand-400/60 transition">
+                                <input type="checkbox" id="SeniorCitizen" value="0" class="w-4 h-4 rounded accent-teal-400 bg-ink-950 border-ink-600">
+                                <i data-lucide="user-round" class="w-4 h-4 text-mist-400"></i> <span>Senior</span>
+                            </label>
+                            <label for="PaperlessBilling" class="flex items-center gap-2.5 text-xs font-medium text-mist-300 bg-ink-950 border border-ink-600 rounded-xl px-3 py-2.5 cursor-pointer hover:border-brand-400/60 transition">
+                                <input type="checkbox" id="PaperlessBilling" checked value="1" class="w-4 h-4 rounded accent-teal-400 bg-ink-950 border-ink-600">
+                                <i data-lucide="file-text" class="w-4 h-4 text-mist-400"></i> <span>Paperless</span>
+                            </label>
+                            <label for="TechSupport" class="flex items-center gap-2.5 text-xs font-medium text-mist-300 bg-ink-950 border border-ink-600 rounded-xl px-3 py-2.5 cursor-pointer hover:border-brand-400/60 transition">
+                                <input type="checkbox" id="TechSupport" value="0" class="w-4 h-4 rounded accent-teal-400 bg-ink-950 border-ink-600">
+                                <i data-lucide="headset" class="w-4 h-4 text-mist-400"></i> <span>Tech Support</span>
+                            </label>
+                        </div>
+                        <p class="text-[11px] text-mist-500 leading-snug">Tick the ones that apply. Customers with tech support usually stay longer.</p>
+                    </fieldset>
+
+                    <!-- Hidden fields to complete the 19 feature schema expected by FastAPI -->
+                    <input type="hidden" id="gender" value="1">
+                    <input type="hidden" id="Partner" value="0">
+                    <input type="hidden" id="Dependents" value="0">
+                    <input type="hidden" id="PhoneService" value="1">
+                    <input type="hidden" id="MultipleLines" value="0">
+                    <input type="hidden" id="OnlineSecurity" value="0">
+                    <input type="hidden" id="OnlineBackup" value="0">
+                    <input type="hidden" id="DeviceProtection" value="0">
+                    <input type="hidden" id="StreamingTV" value="1">
+                    <input type="hidden" id="StreamingMovies" value="1">
+                </form>
+            </div>
+
+            <button onclick="submitPrediction()" class="mt-7 w-full bg-gradient-to-r from-brand-400 to-brand-500 hover:from-brand-300 hover:to-brand-400 text-ink-950 font-bold py-3.5 rounded-xl transition shadow-lg shadow-brand-500/25 flex items-center justify-center gap-2">
+                <i data-lucide="zap" class="w-4 h-4"></i> Run Churn Prediction
+            </button>
+        </section>
+
+        <!-- Right Column: Results & Analytics Bento Grid (2 Span) -->
+        <section class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <!-- Prediction Result Card -->
+            <div class="bg-ink-800/80 border border-ink-600/70 rounded-2xl p-6 shadow-xl shadow-black/20 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-sm font-bold text-white mb-1 flex items-center gap-2">
+                        <i data-lucide="activity" class="w-4 h-4 text-brand-400"></i> Real-Time Inference Result
+                    </h3>
+                    <p class="text-xs text-mist-400 mb-4">The chance that this customer cancels soon.</p>
+
+                    <div id="resultCard" class="bg-ink-950 border border-ink-600 rounded-xl p-6 text-center">
+                        <div id="riskBadge" class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 bg-ink-700 text-mist-400">
+                            Awaiting Prediction
+                        </div>
+                        <div id="probValue" class="num text-5xl font-black text-white tracking-tight mb-1">--%</div>
+                        <p id="predText" class="text-xs text-mist-400">Submit a customer profile on the left to evaluate retention probability.</p>
+                    </div>
+
+                    <!-- Simple key so users know what the colors mean -->
+                    <ul class="mt-4 space-y-2 text-xs text-mist-300">
+                        <li class="flex items-start gap-2"><span class="mt-1 w-2.5 h-2.5 rounded-full bg-risk-low shrink-0"></span><span><span class="font-semibold text-white">Low risk:</span> likely to stay. No action needed.</span></li>
+                        <li class="flex items-start gap-2"><span class="mt-1 w-2.5 h-2.5 rounded-full bg-risk-mid shrink-0"></span><span><span class="font-semibold text-white">Medium risk:</span> keep an eye on them. A check-in can help.</span></li>
+                        <li class="flex items-start gap-2"><span class="mt-1 w-2.5 h-2.5 rounded-full bg-risk-high shrink-0"></span><span><span class="font-semibold text-white">High risk:</span> likely to leave. Reach out with an offer or support.</span></li>
+                    </ul>
+                </div>
+
+                <div class="mt-5 pt-4 border-t border-ink-600/60 text-xs text-mist-400 flex flex-wrap justify-between gap-2">
+                    <span class="inline-flex items-center gap-1.5"><i data-lucide="cpu" class="w-3.5 h-3.5 text-brand-400"></i> Model: XGBoost Classifier</span>
+                    <span class="inline-flex items-center gap-1.5"><i data-lucide="search-check" class="w-3.5 h-3.5 text-brand-400"></i> Explainability: SHAP Engine</span>
+                </div>
+            </div>
+
+            <!-- Retention Drivers / Drivers Chart -->
+            <div class="bg-ink-800/80 border border-ink-600/70 rounded-2xl p-6 shadow-xl shadow-black/20 flex flex-col">
+                <h3 class="text-sm font-bold text-white mb-1 flex items-center gap-2">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 text-brand-400"></i> Key Churn Risk Drivers
+                </h3>
+                <p class="text-xs text-mist-400 mb-4">The customer details that push the risk up or down the most. Longer bars matter more.</p>
+                <div class="flex-grow flex items-center justify-center relative min-h-[14rem]">
+                    <canvas id="driversChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Portfolio Risk Distribution Analytics (Spanning full width of right column) -->
+            <div class="md:col-span-2 bg-ink-800/80 border border-ink-600/70 rounded-2xl p-6 shadow-xl shadow-black/20">
+                <h3 class="text-sm font-bold text-white mb-1 flex items-center gap-2">
+                    <i data-lucide="pie-chart" class="w-4 h-4 text-brand-400"></i> Customer Base Risk Segmentation
+                </h3>
+                <p class="text-xs text-mist-400 mb-4">How all customers are split between low, medium and high risk.</p>
+                <div class="h-48 relative">
+                    <canvas id="segmentationChart"></canvas>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-ink-600/70 bg-ink-900/60 py-6 text-center text-xs text-mist-400">
+        <span class="inline-flex items-center gap-2"><i data-lucide="graduation-cap" class="w-4 h-4 text-brand-400"></i> Customer Churn Predictor & Retention Dashboard • Built for Academic Excellence & Project Competition</span>
+    </footer>
+
+    <!-- Frontend Script -->
+    <script src="script.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

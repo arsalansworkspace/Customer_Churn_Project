@@ -21,3 +21,5 @@ env/
 # Operating system files
 .DS_Store
 Thumbs.db
+
+backend/.env

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f4f8ff">
+    <title>Sign In | ChurnGuard AI</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="./js/api.js" defer></script>
+    <script src="./js/auth.js" defer></script>
+</head>
+<body class="login-page">
+
+    <main class="login-layout">
+        <section class="login-brand-panel">
+            <div class="brand brand-large">
+                <div class="brand-icon">C</div>
+                <span>ChurnGuard<span class="brand-accent"> AI</span></span>
+            </div>
+
+            <div class="brand-content">
+                <span class="eyebrow">CUSTOMER INTELLIGENCE PLATFORM</span>
+                <h1>Understand your customers.<br>Prevent churn.</h1>
+                <p>
+                    Turn customer data into actionable intelligence.
+                    Identify churn risks, understand customer behavior,
+                    and make smarter retention decisions.
+                </p>
+
+                <div class="brand-features">
+                    <div class="feature-item">
+                        <span class="feature-check">✓</span>
+                        Intelligent churn prediction
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-check">✓</span>
+                        Customer risk insights
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-check">✓</span>
+                        Data-driven retention strategies
+                    </div>
+                </div>
+            </div>
+
+            <div class="brand-footer">
+                © 2026 ChurnGuard AI. All rights reserved.
+            </div>
+        </section>
+
+        <section class="login-form-panel">
+            <div class="login-card">
+                <div class="mobile-brand brand">
+                    <div class="brand-icon">C</div>
+                    <span>ChurnGuard<span class="brand-accent"> AI</span></span>
+                </div>
+
+                <div class="login-heading">
+                    <span class="eyebrow">WELCOME BACK</span>
+                    <h2>Sign in to your account</h2>
+                    <p>Enter your credentials to access your workspace.</p>
+                </div>
+
+                <div id="login-message" class="alert" role="alert" hidden></div>
+
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="email">Email address</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="you@company.com"
+                            autocomplete="username"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <div class="password-label-row">
+                            <label for="password">Password</label>
+                        </div>
+
+                        <div class="password-wrapper">
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Enter your password"
+                                autocomplete="current-password"
+                                required
+                            >
+                            <button
+                                type="button"
+                                id="toggle-password"
+                                class="password-toggle"
+                                aria-label="Show password"
+                            >Show</button>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="login-button" class="primary-button">
+                        <span id="login-button-text">Sign in</span>
+                        <span aria-hidden="true">→</span>
+                    </button>
+                </form>
+
+                <div class="login-security">
+                    <span class="security-icon">●</span>
+                    Secure access to your customer intelligence workspace
+                </div>
+            </div>
+        </section>
+    </main>
+
+</body>
+</html>
