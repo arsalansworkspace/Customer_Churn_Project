@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from backend.app.utils.security import get_current_user
 from sqlalchemy import func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -14,9 +15,9 @@ from backend.app.schemas import (
 
 router = APIRouter(
     prefix="/api/customers",
-    tags=["Customers"]
+    tags=["Customers"],
+    dependencies=[Depends(get_current_user)]
 )
-
 
 # CREATE CUSTOMER
 @router.post(
@@ -87,6 +88,42 @@ def get_customer_count(
     )
 
     return {"total_customers": total}
+
+
+
+# GET CUSTOMER STATISTICS
+@router.get("/stats")
+def get_customer_stats(db: Session = Depends(get_db)):
+    total = db.scalar(
+        select(func.count()).select_from(Customer)
+    ) or 0
+
+    churn_rows = db.execute(
+        select(
+            Customer.churn_status,
+            func.count(Customer.id)
+        ).group_by(Customer.churn_status)
+    ).all()
+
+    counts = {
+        status: count
+        for status, count in churn_rows
+    }
+
+    churned = counts.get("Yes", 0)
+    retained = counts.get("No", 0)
+
+    churn_rate = (
+        round((churned / total) * 100, 2)
+        if total > 0 else 0
+    )
+
+    return {
+        "total_customers": total,
+        "churned_customers": churned,
+        "retained_customers": retained,
+        "churn_rate": churn_rate
+    }
 
 
 # GET CUSTOMER BY ID

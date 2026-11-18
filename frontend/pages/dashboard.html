@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | ChurnGuard AI</title>
     <link rel="stylesheet" href="../css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js" defer></script>
     <script src="../js/api.js" defer></script>
     <script src="../js/dashboard.js" defer></script>
 </head>
@@ -98,11 +99,11 @@
 
                 <article class="stat-card">
                     <div class="stat-top">
-                        <span>Predicted Churn</span>
+                        <span>Historical Churn</span>
                         <span class="stat-icon orange">⌁</span>
                     </div>
-                    <h3>—</h3>
-                    <p>Prediction data not available yet</p>
+                    <h3 id="churned-customers">—</h3>
+                    <p>Customers who previously churned</p>
                 </article>
 
                 <article class="stat-card">
@@ -110,8 +111,8 @@
                         <span>Churn Rate</span>
                         <span class="stat-icon purple">%</span>
                     </div>
-                    <h3>—</h3>
-                    <p>Awaiting prediction analytics</p>
+                    <h3 id="churn-rate">—</h3>
+                    <p>Historical customer churn percentage</p>
                 </article>
 
                 <article class="stat-card">
@@ -119,8 +120,8 @@
                         <span>High-Risk Customers</span>
                         <span class="stat-icon red">!</span>
                     </div>
-                    <h3>—</h3>
-                    <p>Awaiting risk analysis</p>
+                    <h3 id="high-risk-customers">—</h3>
+                    <p>Awaiting model risk predictions</p>
                 </article>
 
             </div>
@@ -133,48 +134,90 @@
                             <h3>Customer Churn Analytics</h3>
                             <p>Churn trends and customer distribution</p>
                         </div>
-                        <span class="panel-tag">Coming soon</span>
+                        <span class="panel-tag">Live dataset</span>
                     </div>
 
-                    <div class="empty-chart">
-                        <div class="empty-chart-icon">▥</div>
-                        <h4>Analytics will appear here</h4>
-                        <p>
-                            Once prediction and analytics services are connected,
-                            your customer churn trends will be displayed here.
-                        </p>
+                    <div style="position: relative; height: 280px; width: 100%;">
+                        <canvas id="churn-distribution-chart"></canvas>
                     </div>
                 </section>
 
-                <section class="dashboard-panel risk-panel">
-                    <div class="panel-heading">
-                        <div>
-                            <h3>Customer Risk Overview</h3>
-                            <p>Customer risk distribution</p>
-                        </div>
-                    </div>
+                
+<section class="dashboard-panel risk-panel">
+    <div class="panel-heading">
+        <div>
+            <h3>Customer Risk Overview</h3>
+            <p>Latest prediction risk distribution</p>
+        </div>
+        <span class="panel-tag">Live predictions</span>
+    </div>
 
-                    <div class="empty-state">
-                        <div class="empty-chart-icon">◎</div>
-                        <h4>No risk data yet</h4>
-                        <p>Run churn predictions to view customer risk levels.</p>
-                    </div>
-                </section>
+    <div class="risk-chart-container">
+        <canvas id="risk-distribution-chart"></canvas>
+    </div>
+
+    <div id="risk-summary" class="risk-summary">
+        <div class="risk-summary-item">
+            <span class="risk-indicator low"></span>
+            <span>Low Risk</span>
+            <strong id="low-risk-count">0</strong>
+        </div>
+
+        <div class="risk-summary-item">
+            <span class="risk-indicator medium"></span>
+            <span>Medium Risk</span>
+            <strong id="medium-risk-count">0</strong>
+        </div>
+
+        <div class="risk-summary-item">
+            <span class="risk-indicator high"></span>
+            <span>High Risk</span>
+            <strong id="high-risk-count">0</strong>
+        </div>
+    </div>
+
+    <div id="risk-empty-state" class="empty-state" hidden>
+        <div class="empty-chart-icon">◎</div>
+        <h4>No risk data yet</h4>
+        <p>Run churn predictions to view customer risk levels.</p>
+    </div>
+</section>
+
 
             </div>
 
-            <section class="dashboard-panel activity-panel">
-                <div class="panel-heading">
-                    <div>
-                        <h3>Recent Prediction Activity</h3>
-                        <p>Latest customer prediction records</p>
-                    </div>
-                </div>
 
-                <div class="activity-empty">
-                    No prediction activity is available yet.
-                </div>
-            </section>
+<section class="dashboard-panel activity-panel">
+    <div class="panel-heading">
+        <div>
+            <h3>Recent Prediction Activity</h3>
+            <p>Latest customer prediction records</p>
+        </div>
+        <span class="panel-tag">Recent activity</span>
+    </div>
+
+    <div id="activity-empty" class="activity-empty" hidden>
+        No prediction activity is available yet.
+    </div>
+
+    <div id="activity-content" class="activity-table-wrapper" hidden>
+        <table class="activity-table">
+            <thead>
+                <tr>
+                    <th>Customer ID</th>
+                    <th>Churn Probability</th>
+                    <th>Prediction</th>
+                    <th>Risk Level</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+
+            <tbody id="recent-predictions-body">
+            </tbody>
+        </table>
+    </div>
+</section>
+
 
             <footer class="dashboard-footer">
                 ChurnGuard AI · Customer Intelligence Platform

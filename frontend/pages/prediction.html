@@ -1,0 +1,258 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Churn Prediction | ChurnGuard AI</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="../js/api.js" defer></script>
+    <script src="../js/prediction.js" defer></script>
+</head>
+<body class="dashboard-page">
+
+<div class="dashboard-layout">
+
+    <aside class="sidebar">
+        <div class="sidebar-brand brand">
+            <div class="brand-icon">C</div>
+            <span>ChurnGuard<span class="brand-accent"> AI</span></span>
+        </div>
+
+        <div class="sidebar-section-label">WORKSPACE</div>
+
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-link">
+                <span>▦</span> Dashboard
+            </a>
+            <a href="customers.html" class="nav-link">
+                <span>♙</span> Customers
+            </a>
+            <a href="prediction.html" class="nav-link active">
+                <span>⌁</span> Churn Prediction
+            </a>
+            <a href="analytics.html" class="nav-link">
+                <span>▥</span> Analytics
+            </a>
+            <a href="retention.html" class="nav-link">
+                <span>◎</span> Retention Center
+            </a>
+            <a href="reports.html" class="nav-link">
+                <span>▤</span> Reports
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="sidebar-user">
+                <div class="user-avatar" id="user-avatar">U</div>
+                <div class="user-details">
+                    <strong id="sidebar-user-name">Loading...</strong>
+                    <span id="sidebar-user-role">User</span>
+                </div>
+            </div>
+
+            <button id="logout-button" class="logout-button">
+                ↪ Sign out
+            </button>
+        </div>
+    </aside>
+
+    <main class="dashboard-main">
+
+        <header class="dashboard-header">
+            <div>
+                <h1>Churn Prediction</h1>
+                <p>Identify customers who may be at risk of leaving.</p>
+            </div>
+
+            <div class="header-user">
+                <div class="header-user-info">
+                    <strong id="header-user-name">Loading...</strong>
+                    <span>ChurnGuard Workspace</span>
+                </div>
+                <div class="user-avatar" id="header-avatar">U</div>
+            </div>
+        </header>
+
+        <section class="dashboard-content">
+
+            <div class="section-heading">
+                <div>
+                    <h2>Customer Churn Intelligence</h2>
+                    <p>Select a customer to generate an AI-powered churn prediction.</p>
+                </div>
+
+                <span class="data-status">
+                    <span class="status-dot"></span>
+                    Prediction Engine
+                </span>
+            </div>
+
+            <!-- Customer Selection -->
+            <section class="dashboard-panel prediction-selection-panel">
+
+                <div class="prediction-panel-heading">
+                    <div>
+                        <h3>Select a Customer</h3>
+                        <p>Search your MySQL customer database by customer ID.</p>
+                    </div>
+                </div>
+
+                <div class="prediction-search-row">
+                    <div class="customer-search prediction-search">
+                        <span>⌕</span>
+                        <input
+                            type="search"
+                            id="prediction-customer-search"
+                            placeholder="Enter customer ID or code..."
+                            autocomplete="off"
+                        >
+                    </div>
+
+                    <button
+                        type="button"
+                        id="search-customer-button"
+                        class="add-customer-button"
+                    >
+                        Search Customer
+                    </button>
+                </div>
+
+                <div id="prediction-search-message"
+                    class="customer-message" hidden></div>
+
+                <div id="prediction-customer-results"
+                    class="prediction-customer-results">
+                    <p class="prediction-empty-state">
+                        Search for a customer to begin.
+                    </p>
+                </div>
+
+                <div id="selected-customer-panel"
+                    class="selected-customer-panel" hidden>
+
+                    <div>
+                        <span class="eyebrow">SELECTED CUSTOMER</span>
+                        <h3 id="selected-customer-code">—</h3>
+                        <p id="selected-customer-details">—</p>
+                    </div>
+
+                    <button
+                        type="button"
+                        id="generate-prediction-button"
+                        class="add-customer-button"
+                        disabled
+                    >
+                        Generate Prediction
+                    </button>
+                </div>
+
+            </section>
+
+            <!-- Prediction Result -->
+            <section class="dashboard-panel prediction-result-panel">
+
+                <div class="prediction-panel-heading">
+                    <div>
+                        <h3>Prediction Result</h3>
+                        <p>Model-generated churn probability and risk assessment.</p>
+                    </div>
+                </div>
+
+                <div id="prediction-result-message"
+                    class="customer-message" hidden></div>
+
+                <div id="prediction-result-content"
+                    class="prediction-result-content">
+
+                    <div class="prediction-empty-state">
+                        <div class="prediction-empty-icon">⌁</div>
+                        <h3>No Prediction Generated</h3>
+                        <p>
+                            Select a customer and generate a prediction
+                            to view the result here.
+                        </p>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- Selected Customer Prediction History -->
+            <section class="dashboard-panel prediction-history-panel">
+
+                <div class="prediction-panel-heading">
+                    <div>
+                        <h3>Customer Prediction History</h3>
+                        <p>Previous predictions for the selected customer.</p>
+                    </div>
+                </div>
+
+                <div class="prediction-table-wrapper">
+                    <table class="customer-table">
+                        <thead>
+                            <tr>
+                                <th>Prediction ID</th>
+                                <th>Churn Probability</th>
+                                <th>Prediction</th>
+                                <th>Risk Level</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="prediction-history-body">
+                            <tr>
+                                <td colspan="5" class="table-placeholder">
+                                    Select a customer to view prediction history.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </section>
+
+            <!-- Recent Predictions -->
+            <section class="dashboard-panel recent-predictions-panel">
+
+                <div class="prediction-panel-heading">
+                    <div>
+                        <h3>Recent Predictions</h3>
+                        <p>Latest prediction records saved in your database.</p>
+                    </div>
+                </div>
+
+                <div class="prediction-table-wrapper">
+                    <table class="customer-table">
+                        <thead>
+                            <tr>
+                                <th>Customer ID</th>
+                                <th>Churn Probability</th>
+                                <th>Prediction</th>
+                                <th>Risk Level</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="recent-predictions-body">
+                            <tr>
+                                <td colspan="5" class="table-placeholder">
+                                    Loading recent predictions...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </section>
+
+            <footer class="dashboard-footer">
+                ChurnGuard AI · Customer Intelligence Platform
+            </footer>
+
+        </section>
+    </main>
+</div>
+
+</body>
+</html>

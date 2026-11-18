@@ -1,0 +1,438 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Reports | ChurnGuard AI</title>
+
+    <link rel="stylesheet" href="../css/style.css">
+
+    <script src="../js/api.js" defer></script>
+    <script src="../js/reports.js" defer></script>
+</head>
+
+<body class="dashboard-page">
+
+<div class="dashboard-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="sidebar-brand">
+            <div class="brand-icon">C</div>
+            <span>ChurnGuard <strong>AI</strong></span>
+        </div>
+
+        <div class="sidebar-section-label">MAIN MENU</div>
+
+        <nav class="sidebar-nav">
+
+            <a href="dashboard.html" class="nav-link">
+                <span>▦</span>
+                Dashboard
+            </a>
+
+            <a href="customers.html" class="nav-link">
+                <span>♙</span>
+                Customers
+            </a>
+
+            <a href="prediction.html" class="nav-link">
+                <span>⌁</span>
+                Churn Prediction
+            </a>
+
+            <a href="analytics.html" class="nav-link">
+                <span>▥</span>
+                Analytics
+            </a>
+
+            <a href="retention.html" class="nav-link">
+                <span>♡</span>
+                Retention Center
+            </a>
+
+            <a href="reports.html" class="nav-link active">
+                <span>▤</span>
+                Reports
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <div class="sidebar-user">
+
+                <div class="user-avatar" id="user-avatar">U</div>
+
+                <div class="user-details">
+                    <strong id="sidebar-user-name">Loading...</strong>
+                    <span id="sidebar-user-role">User</span>
+                </div>
+
+            </div>
+
+            <button class="logout-button" id="logout-button">
+                ↪ Logout
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="dashboard-main">
+
+        <!-- HEADER -->
+        <header class="dashboard-header">
+
+            <div>
+                <h2>Reports</h2>
+                <p>Export and download business intelligence reports</p>
+            </div>
+
+            <div class="header-user">
+                <span id="header-user-name">Loading...</span>
+            </div>
+
+        </header>
+
+
+        <!-- PAGE CONTENT -->
+        <section class="dashboard-content reports-page">
+
+            <!-- PAGE INTRODUCTION -->
+            <div class="section-heading">
+
+                <div>
+                    <h1>Reports & Exports</h1>
+
+                    <p>
+                        Generate professional reports and export your
+                        customer, prediction, and retention data.
+                    </p>
+                </div>
+
+                <div class="data-status" id="reports-status">
+                    <span class="status-dot"></span>
+                    Ready to export
+                </div>
+
+            </div>
+
+
+            <!-- MESSAGE -->
+            <div
+                id="reports-message"
+                class="reports-message"
+                role="status"
+                aria-live="polite"
+                hidden
+            ></div>
+
+
+            <!-- REPORT INFORMATION -->
+            <article class="dashboard-panel reports-intro-panel">
+
+                <div class="reports-intro-content">
+
+                    <div class="reports-intro-icon">
+                        ▤
+                    </div>
+
+                    <div>
+                        <h3>Business Intelligence Reports</h3>
+
+                        <p>
+                            All reports are generated directly from your
+                            ChurnGuard MySQL database. Exported files contain
+                            actual customer records, saved predictions,
+                            and retention activities.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="reports-intro-footer">
+                    <span>✓ Live database records</span>
+                    <span>✓ Authenticated exports</span>
+                    <span>✓ Multiple file formats</span>
+                </div>
+
+            </article>
+
+
+            <!-- EXPORT CARDS -->
+            <div class="reports-section-heading">
+                <div>
+                    <h2>Available Exports</h2>
+                    <p>Select a report to download.</p>
+                </div>
+            </div>
+
+
+            <div class="reports-grid">
+
+
+                <!-- PDF REPORT -->
+                <article class="dashboard-panel report-card">
+
+                    <div class="report-card-top">
+
+                        <div class="report-file-icon pdf-icon">
+                            PDF
+                        </div>
+
+                        <span class="report-format-badge">
+                            PDF Document
+                        </span>
+
+                    </div>
+
+                    <h3>Churn Analytics Report</h3>
+
+                    <p class="report-description">
+                        A professional business report containing customer
+                        KPIs, churn statistics, prediction risk distribution,
+                        and the 25 highest-risk customers.
+                    </p>
+
+                    <div class="report-details">
+
+                        <div>
+                            <span>Format</span>
+                            <strong>PDF</strong>
+                        </div>
+
+                        <div>
+                            <span>Includes</span>
+                            <strong>Analytics & Risk</strong>
+                        </div>
+
+                    </div>
+
+                    <button
+                        class="report-download-button"
+                        data-report="pdf"
+                        type="button"
+                    >
+                        <span>↓</span>
+                        Download PDF Report
+                    </button>
+
+                </article>
+
+
+                <!-- EXCEL REPORT -->
+                <article class="dashboard-panel report-card">
+
+                    <div class="report-card-top">
+
+                        <div class="report-file-icon excel-icon">
+                            XLS
+                        </div>
+
+                        <span class="report-format-badge">
+                            Excel Workbook
+                        </span>
+
+                    </div>
+
+                    <h3>Complete Business Dataset</h3>
+
+                    <p class="report-description">
+                        A structured Excel workbook with separate worksheets
+                        for customers, prediction history, and retention
+                        actions.
+                    </p>
+
+                    <div class="report-details">
+
+                        <div>
+                            <span>Format</span>
+                            <strong>XLSX</strong>
+                        </div>
+
+                        <div>
+                            <span>Worksheets</span>
+                            <strong>3 Sheets</strong>
+                        </div>
+
+                    </div>
+
+                    <button
+                        class="report-download-button"
+                        data-report="excel"
+                        type="button"
+                    >
+                        <span>↓</span>
+                        Download Excel Workbook
+                    </button>
+
+                </article>
+
+
+                <!-- CUSTOMER CSV -->
+                <article class="dashboard-panel report-card">
+
+                    <div class="report-card-top">
+
+                        <div class="report-file-icon csv-icon">
+                            CSV
+                        </div>
+
+                        <span class="report-format-badge">
+                            Customer Data
+                        </span>
+
+                    </div>
+
+                    <h3>Customer Dataset</h3>
+
+                    <p class="report-description">
+                        Export the complete customer database, including
+                        demographics, service subscriptions, contract
+                        information, charges, and historical churn status.
+                    </p>
+
+                    <div class="report-details">
+
+                        <div>
+                            <span>Format</span>
+                            <strong>CSV</strong>
+                        </div>
+
+                        <div>
+                            <span>Records</span>
+                            <strong>All Customers</strong>
+                        </div>
+
+                    </div>
+
+                    <button
+                        class="report-download-button"
+                        data-report="customers"
+                        type="button"
+                    >
+                        <span>↓</span>
+                        Download Customer CSV
+                    </button>
+
+                </article>
+
+
+                <!-- PREDICTION CSV -->
+                <article class="dashboard-panel report-card">
+
+                    <div class="report-card-top">
+
+                        <div class="report-file-icon csv-icon">
+                            CSV
+                        </div>
+
+                        <span class="report-format-badge">
+                            Prediction Data
+                        </span>
+
+                    </div>
+
+                    <h3>Churn Prediction History</h3>
+
+                    <p class="report-description">
+                        Export all saved machine learning predictions,
+                        including customer codes, churn probabilities,
+                        model thresholds, prediction results, and risk levels.
+                    </p>
+
+                    <div class="report-details">
+
+                        <div>
+                            <span>Format</span>
+                            <strong>CSV</strong>
+                        </div>
+
+                        <div>
+                            <span>Records</span>
+                            <strong>All Predictions</strong>
+                        </div>
+
+                    </div>
+
+                    <button
+                        class="report-download-button"
+                        data-report="predictions"
+                        type="button"
+                    >
+                        <span>↓</span>
+                        Download Prediction CSV
+                    </button>
+
+                </article>
+
+
+            </div>
+
+
+            <!-- EXPORT GUIDANCE -->
+            <article class="dashboard-panel reports-info-panel">
+
+                <div class="panel-heading">
+                    <div>
+                        <h3>About Your Exports</h3>
+                        <p>Important information about generated reports</p>
+                    </div>
+                </div>
+
+                <div class="reports-info-grid">
+
+                    <div>
+                        <strong>PDF Report</strong>
+                        <p>
+                            Suitable for business presentations,
+                            management reviews, and documentation.
+                        </p>
+                    </div>
+
+                    <div>
+                        <strong>Excel Workbook</strong>
+                        <p>
+                            Suitable for data analysis, filtering,
+                            sorting, and spreadsheet operations.
+                        </p>
+                    </div>
+
+                    <div>
+                        <strong>CSV Files</strong>
+                        <p>
+                            Suitable for importing data into Python,
+                            Excel, Power BI, and other analytics tools.
+                        </p>
+                    </div>
+
+                </div>
+
+            </article>
+
+
+            <!-- FOOTER -->
+            <footer class="dashboard-footer">
+
+                <p>
+                    © 2026 ChurnGuard AI. Customer Intelligence Platform.
+                </p>
+
+                <span>Powered by Machine Learning</span>
+
+            </footer>
+
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+</html>

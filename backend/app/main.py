@@ -3,7 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import SQLAlchemyError
 
 from backend.app.database import test_connection
-from backend.app.routers import auth_router, customers_router
+from backend.app.routers import (
+    auth_router,
+    customers_router,
+    predictions_router,
+    analytics_router,
+    retention_router,
+    reports_router,
+)
 
 
 app = FastAPI(
@@ -24,9 +31,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Register API routers
 app.include_router(customers_router)
 app.include_router(auth_router)
+app.include_router(predictions_router)
+app.include_router(analytics_router)
+app.include_router(retention_router)
 
 
 # Root endpoint
@@ -60,5 +71,4 @@ def health_check():
                 "database": "disconnected"
             }
         )
-
-
+app.include_router(reports_router)

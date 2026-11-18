@@ -1,0 +1,685 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retention Center | ChurnGuard AI</title>
+
+    <link rel="stylesheet" href="../css/style.css">
+
+    <script src="../js/api.js" defer></script>
+    <script src="../js/retention.js" defer></script>
+</head>
+
+<body class="dashboard-page">
+
+<div class="dashboard-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="sidebar-brand brand">
+            <div class="brand-icon">C</div>
+            <span>ChurnGuard<span class="brand-accent"> AI</span></span>
+        </div>
+
+        <div class="sidebar-section-label">WORKSPACE</div>
+
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-link">
+                <span>▦</span> Dashboard
+            </a>
+
+            <a href="customers.html" class="nav-link">
+                <span>♙</span> Customers
+            </a>
+
+            <a href="prediction.html" class="nav-link">
+                <span>⌁</span> Churn Prediction
+            </a>
+
+            <a href="analytics.html" class="nav-link">
+                <span>▥</span> Analytics
+            </a>
+
+            <a href="retention.html" class="nav-link active">
+                <span>◎</span> Retention Center
+            </a>
+
+            <a href="reports.html" class="nav-link">
+                <span>▤</span> Reports
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <div class="sidebar-user">
+                <div class="user-avatar" id="user-avatar">U</div>
+
+                <div class="user-details">
+                    <strong id="sidebar-user-name">Loading...</strong>
+                    <span id="sidebar-user-role">User</span>
+                </div>
+            </div>
+
+            <button id="logout-button" class="logout-button">
+                ↪ Sign out
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="dashboard-main">
+
+        <!-- HEADER -->
+        <header class="dashboard-header">
+
+            <div>
+                <h1>Retention Center</h1>
+                <p>Manage at-risk customers and improve customer retention.</p>
+            </div>
+
+            <div class="header-user">
+
+                <div class="header-user-info">
+                    <strong id="header-user-name">Loading...</strong>
+                    <span>ChurnGuard Workspace</span>
+                </div>
+
+                <div class="user-avatar">U</div>
+
+            </div>
+
+        </header>
+
+
+        <section class="dashboard-content">
+
+            <!-- PAGE HEADING -->
+            <div class="section-heading">
+
+                <div>
+                    <h2>Retention Overview</h2>
+                    <p>Monitor customer risks and retention activities.</p>
+                </div>
+
+                <span class="data-status">
+                    <span class="status-dot"></span>
+                    Live database data
+                </span>
+
+            </div>
+
+
+            <!-- STATUS MESSAGES -->
+            <div id="retention-message" class="retention-message" hidden></div>
+
+
+            <!-- KPI CARDS -->
+            <div class="stats-grid">
+
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span>Customers with Predictions</span>
+                        <span class="stat-icon blue">♙</span>
+                    </div>
+
+                    <h3 id="retention-predicted-customers">—</h3>
+                    <p>Customers with available risk assessments</p>
+                </article>
+
+
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span>High-Risk Customers</span>
+                        <span class="stat-icon red">!</span>
+                    </div>
+
+                    <h3 id="retention-high-risk">—</h3>
+                    <p>Customers requiring immediate attention</p>
+                </article>
+
+
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span>Active Retention Actions</span>
+                        <span class="stat-icon orange">⌁</span>
+                    </div>
+
+                    <h3 id="retention-active-actions">—</h3>
+                    <p>Pending and in-progress activities</p>
+                </article>
+
+
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span>Overdue Actions</span>
+                        <span class="stat-icon purple">◷</span>
+                    </div>
+
+                    <h3 id="retention-overdue-actions">—</h3>
+                    <p>Activities requiring follow-up</p>
+                </article>
+
+            </div>
+
+
+            <!-- RISK AND ACTION PANELS -->
+            <div class="dashboard-panels">
+
+                <section class="dashboard-panel retention-risk-panel">
+
+                    <div class="panel-heading">
+                        <div>
+                            <h3>Customer Risk Distribution</h3>
+                            <p>Latest prediction risk levels</p>
+                        </div>
+
+                        <span class="panel-tag">Live predictions</span>
+                    </div>
+
+                    <div class="retention-risk-list">
+
+                        <div class="retention-risk-item">
+                            <div class="retention-risk-label">
+                                <span class="risk-indicator high"></span>
+                                <strong>High Risk</strong>
+                                <span id="high-risk-percentage">0%</span>
+                            </div>
+
+                            <div class="retention-progress">
+                                <div id="high-risk-bar"
+                                     class="retention-progress-fill high"
+                                     style="width: 0%">
+                                </div>
+                            </div>
+
+                            <small id="high-risk-count">0 customers</small>
+                        </div>
+
+
+                        <div class="retention-risk-item">
+                            <div class="retention-risk-label">
+                                <span class="risk-indicator medium"></span>
+                                <strong>Medium Risk</strong>
+                                <span id="medium-risk-percentage">0%</span>
+                            </div>
+
+                            <div class="retention-progress">
+                                <div id="medium-risk-bar"
+                                     class="retention-progress-fill medium"
+                                     style="width: 0%">
+                                </div>
+                            </div>
+
+                            <small id="medium-risk-count">0 customers</small>
+                        </div>
+
+
+                        <div class="retention-risk-item">
+                            <div class="retention-risk-label">
+                                <span class="risk-indicator low"></span>
+                                <strong>Low Risk</strong>
+                                <span id="low-risk-percentage">0%</span>
+                            </div>
+
+                            <div class="retention-progress">
+                                <div id="low-risk-bar"
+                                     class="retention-progress-fill low"
+                                     style="width: 0%">
+                                </div>
+                            </div>
+
+                            <small id="low-risk-count">0 customers</small>
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <section class="dashboard-panel">
+
+                    <div class="panel-heading">
+                        <div>
+                            <h3>Retention Activity</h3>
+                            <p>Current action status distribution</p>
+                        </div>
+                    </div>
+
+                    <div class="retention-activity-stats">
+
+                        <div>
+                            <strong id="pending-actions">0</strong>
+                            <span>Pending</span>
+                        </div>
+
+                        <div>
+                            <strong id="progress-actions">0</strong>
+                            <span>In Progress</span>
+                        </div>
+
+                        <div>
+                            <strong id="completed-actions">0</strong>
+                            <span>Completed</span>
+                        </div>
+
+                        <div>
+                            <strong id="cancelled-actions">0</strong>
+                            <span>Cancelled</span>
+                        </div>
+
+                    </div>
+
+                    <div class="retention-interaction-summary">
+                        <span>Total Customer Interactions</span>
+                        <strong id="total-interactions">0</strong>
+                    </div>
+
+                </section>
+
+            </div>
+
+
+            <!-- AT RISK CUSTOMERS -->
+            <section class="dashboard-panel retention-section">
+
+                <div class="panel-heading">
+
+                    <div>
+                        <h3>At-Risk Customers</h3>
+                        <p>Customers with their latest churn predictions</p>
+                    </div>
+
+                    <button class="primary-button"
+                            id="refresh-retention-button">
+                        ↻ Refresh
+                    </button>
+
+                </div>
+
+
+                <div class="retention-toolbar">
+
+                    <input
+                        type="text"
+                        id="risk-customer-search"
+                        placeholder="Search customer code..."
+                    >
+
+                    <select id="risk-level-filter">
+                        <option value="">All Risk Levels</option>
+                        <option value="High">High Risk</option>
+                        <option value="Medium">Medium Risk</option>
+                        <option value="Low">Low Risk</option>
+                    </select>
+
+                </div>
+
+
+                <div class="table-responsive">
+
+                    <table class="retention-table">
+
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Tenure</th>
+                                <th>Contract</th>
+                                <th>Monthly Charges</th>
+                                <th>Churn Probability</th>
+                                <th>Risk Level</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="at-risk-customers-body">
+                            <tr>
+                                <td colspan="7" class="table-loading">
+                                    Loading customer risk data...
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+
+            <!-- RETENTION ACTIONS -->
+            <section class="dashboard-panel retention-section">
+
+                <div class="panel-heading">
+
+                    <div>
+                        <h3>Retention Actions</h3>
+                        <p>Manage customer retention activities and follow-ups</p>
+                    </div>
+
+                    <button class="primary-button"
+                            id="open-action-modal">
+                        + Create Action
+                    </button>
+
+                </div>
+
+
+                <div class="retention-toolbar">
+
+                    <select id="action-status-filter">
+                        <option value="">All Statuses</option>
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+
+                    <select id="action-priority-filter">
+                        <option value="">All Priorities</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+
+                </div>
+
+
+                <div class="table-responsive">
+
+                    <table class="retention-table">
+
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Action</th>
+                                <th>Priority</th>
+                                <th>Assigned To</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Manage</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="retention-actions-body">
+                            <tr>
+                                <td colspan="7" class="table-loading">
+                                    Loading retention actions...
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+
+            <!-- CUSTOMER INTERACTIONS -->
+            <section class="dashboard-panel retention-section">
+
+                <div class="panel-heading">
+
+                    <div>
+                        <h3>Customer Interactions</h3>
+                        <p>Record customer communication and review interaction history</p>
+                    </div>
+
+                    <button class="primary-button"
+                            id="open-interaction-modal">
+                        + Record Interaction
+                    </button>
+
+                </div>
+
+
+                <div class="retention-toolbar">
+
+                    <input
+                        type="number"
+                        id="interaction-customer-id"
+                        min="1"
+                        placeholder="Enter customer ID to view history"
+                    >
+
+                    <button class="secondary-button"
+                            id="load-interactions-button">
+                        View History
+                    </button>
+
+                </div>
+
+
+                <div id="interaction-history-container"
+                     class="interaction-history-container">
+
+                    <div class="activity-empty">
+                        Select a customer to view interaction history.
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- FOOTER -->
+            <footer class="dashboard-footer">
+                ChurnGuard AI · Customer Intelligence Platform
+            </footer>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- CREATE RETENTION ACTION MODAL -->
+<div class="retention-modal-overlay"
+     id="action-modal"
+     hidden>
+
+    <div class="retention-modal">
+
+        <div class="retention-modal-header">
+            <div>
+                <h2>Create Retention Action</h2>
+                <p>Assign a retention activity to a customer.</p>
+            </div>
+
+            <button type="button"
+                    class="modal-close"
+                    data-close-modal="action-modal">
+                ×
+            </button>
+        </div>
+
+
+        <form id="retention-action-form">
+
+            <div class="form-group">
+                <label for="action-customer-id">Customer ID *</label>
+                <input type="number"
+                       id="action-customer-id"
+                       min="1"
+                       required
+                       placeholder="Enter customer ID">
+            </div>
+
+
+            <div class="form-group">
+                <label for="action-type">Action Type *</label>
+                <input type="text"
+                       id="action-type"
+                       maxlength="100"
+                       required
+                       placeholder="e.g. Retention Call">
+            </div>
+
+
+            <div class="form-group">
+                <label for="action-description">Description</label>
+                <textarea id="action-description"
+                          rows="3"
+                          placeholder="Describe the retention activity..."></textarea>
+            </div>
+
+
+            <div class="form-row">
+
+                <div class="form-group">
+                    <label for="action-priority">Priority</label>
+
+                    <select id="action-priority">
+                        <option value="Low">Low</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="action-assigned-user">Assigned User ID</label>
+                    <input type="number"
+                           id="action-assigned-user"
+                           min="1"
+                           placeholder="Optional">
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+                <label for="action-due-date">Due Date</label>
+                <input type="date" id="action-due-date">
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button type="button"
+                        class="secondary-button"
+                        data-close-modal="action-modal">
+                    Cancel
+                </button>
+
+                <button type="submit" class="primary-button">
+                    Create Action
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- RECORD CUSTOMER INTERACTION MODAL -->
+<div class="retention-modal-overlay"
+     id="interaction-modal"
+     hidden>
+
+    <div class="retention-modal">
+
+        <div class="retention-modal-header">
+            <div>
+                <h2>Record Customer Interaction</h2>
+                <p>Save a customer communication record.</p>
+            </div>
+
+            <button type="button"
+                    class="modal-close"
+                    data-close-modal="interaction-modal">
+                ×
+            </button>
+        </div>
+
+
+        <form id="customer-interaction-form">
+
+            <div class="form-group">
+                <label for="interaction-form-customer-id">Customer ID *</label>
+                <input type="number"
+                       id="interaction-form-customer-id"
+                       min="1"
+                       required
+                       placeholder="Enter customer ID">
+            </div>
+
+
+            <div class="form-row">
+
+                <div class="form-group">
+                    <label for="interaction-type">Interaction Type *</label>
+
+                    <select id="interaction-type" required>
+                        <option value="Call">Call</option>
+                        <option value="Email">Email</option>
+                        <option value="Meeting">Meeting</option>
+                        <option value="Follow-up">Follow-up</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="interaction-channel">Channel</label>
+
+                    <input type="text"
+                           id="interaction-channel"
+                           maxlength="50"
+                           placeholder="e.g. Phone, Email">
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+                <label for="interaction-subject">Subject</label>
+
+                <input type="text"
+                       id="interaction-subject"
+                       maxlength="200"
+                       placeholder="Interaction subject">
+            </div>
+
+
+            <div class="form-group">
+                <label for="interaction-notes">Notes</label>
+
+                <textarea id="interaction-notes"
+                          rows="4"
+                          placeholder="Write interaction details..."></textarea>
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button type="button"
+                        class="secondary-button"
+                        data-close-modal="interaction-modal">
+                    Cancel
+                </button>
+
+                <button type="submit" class="primary-button">
+                    Save Interaction
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>
