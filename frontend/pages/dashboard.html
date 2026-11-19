@@ -1,229 +1,1266 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1d4ed8">
+
     <title>Dashboard | ChurnGuard AI</title>
-    <link rel="stylesheet" href="../css/style.css">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Common typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js" defer></script>
+
+    <!-- Application scripts -->
     <script src="../js/api.js" defer></script>
     <script src="../js/dashboard.js" defer></script>
+
+    <style>
+        :root {
+            --navy:#101d35;
+            --navy-light: #1a2b49;
+            --navy-hover: #20314d;
+            --gold: #dfc18f;
+
+            --page: #f8fafc;
+            --surface: #ffffff;
+
+            --ink: #17243a;
+            --text: #475569;
+            --muted: #8993a3;
+
+            --border: #e8edf3;
+
+            --blue: #4269a5;
+            --green: #438b70;
+            --orange: #bd8950;
+            --red: #b85d5d;
+
+            --shadow: 0 2px 8px rgba(15, 23, 42, .035);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            background: var(--page);
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        button, input, select {
+            font: inherit;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        /* =========================
+           MAIN LAYOUT
+        ========================== */
+
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* =========================
+           SHARED SIDEBAR
+           Keep this identical on
+           every authenticated page.
+        ========================== */
+
+        .sidebar {
+            width: 250px;
+            min-width: 250px;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 25px 17px 18px;
+            background: var(--navy);
+            color: #fff;
+            border-right: 1px solid #263751;
+            z-index: 50;
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 0 8px;
+            margin-bottom: 42px;
+            color: white;
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: -.7px;
+        }
+
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(197,164,109,.65);
+            border-radius: 9px;
+            background: rgba(197,164,109,.12);
+            color: var(--gold);
+        }
+
+        .brand-icon svg {
+            width: 26px;
+            height: 26px;
+        }
+
+        .brand-accent {
+            color: var(--gold);
+        }
+
+        .sidebar-section-label {
+            padding: 0 11px;
+            margin-bottom: 13px;
+            color: #8492a8;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1.8px;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .nav-link {
+            min-height: 43px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 12px;
+            border: 1px solid transparent;
+            border-radius: 7px;
+            color: #c0cad8;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            transition: .2s ease;
+        }
+
+        .nav-link svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,.055);
+            color: #fff;
+        }
+
+        .nav-link.active {
+            background: var(--navy-hover);
+            border-color: #344762;
+            color: #fff;
+            font-weight: 700;
+            box-shadow: inset 2px 0 0 var(--gold);
+        }
+
+        .nav-link.active svg {
+            color: var(--gold);
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            padding-top: 17px;
+            border-top: 1px solid #263751;
+        }
+
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 5px 14px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            display: grid;
+            place-items: center;
+            border: 1px solid #d8c29d;
+            border-radius: 50%;
+            background: #e8ddc9;
+            color: #26334a;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .user-details {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .user-details strong {
+            overflow: hidden;
+            color: #f5f6f8;
+            font-size: 11px;
+            font-weight: 700;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-details span {
+            color: #9eacc0;
+            font-size: 10px;
+        }
+
+        .logout-button {
+            width: 100%;
+            min-height: 38px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border: 1px solid #344762;
+            border-radius: 7px;
+            background: transparent;
+            color: #c5cfdd;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .logout-button svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .logout-button:hover {
+            border-color: #71819a;
+            background: rgba(255,255,255,.06);
+            color: #fff;
+        }
+
+        /* =========================
+           MAIN CONTENT
+        ========================== */
+
+        .dashboard-main {
+            flex: 1;
+            min-width: 0;
+            padding: 29px 34px 20px;
+        }
+
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding-bottom: 23px;
+            border-bottom: 1px solid #e5eaf0;
+        }
+
+        .dashboard-header h1 {
+            margin: 0;
+            color: var(--ink);
+            font-size: 25px;
+            font-weight: 800;
+            letter-spacing: -.9px;
+        }
+
+        .dashboard-header p {
+            margin: 7px 0 0;
+            color: #778397;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .header-user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            text-align: right;
+        }
+
+        .header-user-info strong {
+            color: var(--ink);
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .header-user-info span {
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .dashboard-content {
+            padding-top: 27px;
+        }
+
+        /* =========================
+           SECTION HEADING
+        ========================== */
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 17px;
+        }
+
+        .section-heading h2 {
+            margin: 0;
+            color: var(--ink);
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .section-heading p {
+            margin: 5px 0 0;
+            color: #8490a0;
+            font-size: 11px;
+        }
+
+        .data-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border: 1px solid #dce8df;
+            border-radius: 6px;
+            background: #f1f7f2;
+            color: #47795d;
+            font-size: 10px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #5a9a70;
+        }
+
+        /* =========================
+           KPI CARDS
+        ========================== */
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4,minmax(0,1fr));
+            gap: 16px;
+        }
+
+        .stat-card {
+            position: relative;
+            min-width: 0;
+            padding: 19px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: white;
+            box-shadow: var(--shadow);
+            transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+        }
+
+        .stat-card::before {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #d9c39d;
+            content: "";
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: #d5cbb9;
+            box-shadow: 0 8px 22px rgba(15,23,42,.055);
+        }
+
+        .stat-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .stat-top > span:first-child {
+            color: #778294;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .stat-icon {
+            width: 34px;
+            height: 34px;
+            display: grid;
+            place-items: center;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .stat-icon svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .stat-icon.blue {
+            border-color: #dce5f0;
+            background: #eff3f8;
+            color: #55739b;
+        }
+
+        .stat-icon.orange {
+            border-color: #eee2d1;
+            background: #f8f1e8;
+            color: #aa7b43;
+        }
+
+        .stat-icon.purple {
+            border-color: #e4dfed;
+            background: #f2eff7;
+            color: #77658f;
+        }
+
+        .stat-icon.red {
+            border-color: #eddddd;
+            background: #f8eeee;
+            color: #a85f5f;
+        }
+
+        .stat-card h3 {
+            margin: 17px 0 7px;
+            color: var(--ink);
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-card p {
+            margin: 0;
+            color: #929baa;
+            font-size: 10px;
+            line-height: 1.5;
+        }
+
+        /* =========================
+           CHART PANELS
+        ========================== */
+
+        .dashboard-panels {
+            display: grid;
+            grid-template-columns: minmax(0,1.15fr) minmax(0,.85fr);
+            gap: 16px;
+            margin-top: 19px;
+        }
+
+        .dashboard-panel {
+            min-width: 0;
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: white;
+            box-shadow: var(--shadow);
+        }
+
+        .panel-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .panel-heading h3 {
+            margin: 0;
+            color: var(--ink);
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .panel-heading p {
+            margin: 6px 0 0;
+            color: #8993a1;
+            font-size: 10px;
+        }
+
+        .panel-tag {
+            padding: 6px 9px;
+            border: 1px solid #e6dfd2;
+            border-radius: 5px;
+            background: #faf7f1;
+            color: #8c744f;
+            font-size: 9px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .chart-canvas-container {
+            position: relative;
+            width: 100%;
+            height: 270px;
+        }
+
+        .chart-canvas-container canvas,
+        .risk-chart-container canvas {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .risk-chart-container {
+            position: relative;
+            width: 100%;
+            height: 195px;
+        }
+
+        /* =========================
+           RISK SUMMARY
+        ========================== */
+
+        .risk-summary {
+            display: grid;
+            grid-template-columns: repeat(3,minmax(0,1fr));
+            gap: 9px;
+            margin-top: 15px;
+            padding-top: 14px;
+            border-top: 1px solid #eeece7;
+        }
+
+        .risk-summary-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #758093;
+            font-size: 9px;
+        }
+
+        .risk-summary-item strong {
+            margin-left: auto;
+            color: var(--ink);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .risk-indicator {
+            width: 7px;
+            height: 7px;
+            flex-shrink: 0;
+            border-radius: 50%;
+        }
+
+        .risk-indicator.low {
+            background: #6d9c83;
+        }
+
+        .risk-indicator.medium {
+            background: #c69b5f;
+        }
+
+        .risk-indicator.high {
+            background: #bd6b6b;
+        }
+
+        /* =========================
+           EMPTY STATES
+        ========================== */
+
+        .empty-state {
+            padding: 20px 10px;
+            text-align: center;
+        }
+
+        .empty-chart-icon {
+            color: #a6adba;
+            font-size: 29px;
+        }
+
+        .empty-state h4 {
+            margin: 8px 0;
+            color: var(--ink);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .empty-state p {
+            margin: 0;
+            color: #8993a1;
+            font-size: 10px;
+        }
+
+        /* =========================
+           ACTIVITY TABLE
+        ========================== */
+
+        .activity-panel {
+            margin-top: 18px;
+        }
+
+        .activity-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .activity-empty {
+            padding: 27px 15px;
+            border: 1px dashed #d9e0e9;
+            border-radius: 7px;
+            background: #f8fafc;
+            color: #8490a0;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        .activity-table {
+            width: 100%;
+            border-collapse: collapse;
+            white-space: nowrap;
+        }
+
+        .activity-table th {
+            padding: 12px 14px;
+            border-bottom: 1px solid #e9edf2;
+            background: #f8fafc;
+            color: #7b8797;
+            font-size: 10px;
+            font-weight: 800;
+            text-align: left;
+        }
+
+        .activity-table td {
+            padding: 13px 14px;
+            border-bottom: 1px solid #eff2f5;
+            background: white;
+            color: #48566b;
+            font-size: 11px;
+        }
+
+        .activity-table tbody tr {
+            transition: background .2s ease;
+        }
+
+        .activity-table tbody tr:hover td {
+            background: #f8fafc;
+        }
+
+        .activity-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .risk-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 9px;
+            border: 1px solid transparent;
+            border-radius: 5px;
+            font-size: 9px;
+            font-weight: 800;
+        }
+
+        .risk-badge.low {
+            border-color: #dce9df;
+            background: #f0f6f1;
+            color: #47795d;
+        }
+
+        .risk-badge.medium {
+            border-color: #eee4d2;
+            background: #faf5eb;
+            color: #96713e;
+        }
+
+        .risk-badge.high {
+            border-color: #eedddd;
+            background: #f9eeee;
+            color: #a45151;
+        }
+
+        /* =========================
+           FOOTER
+        ========================== */
+
+        .dashboard-footer {
+            padding: 23px 0 5px;
+            color: #a0a5ad;
+            font-size: 10px;
+            text-align: center;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================== */
+
+        @media(max-width: 1200px) {
+            .dashboard-main {
+                padding: 25px 23px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2,minmax(0,1fr));
+            }
+        }
+
+        @media(max-width: 900px) {
+            .dashboard-layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                min-width: 0;
+                min-height: auto;
+                padding: 17px 20px;
+            }
+
+            .sidebar-brand {
+                margin-bottom: 20px;
+            }
+
+            .sidebar-section-label {
+                display: none;
+            }
+
+            .sidebar-nav {
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .nav-link {
+                min-height: 37px;
+                padding: 0 10px;
+                font-size: 10px;
+            }
+
+            .sidebar-bottom {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                margin-top: 14px;
+                padding-top: 12px;
+            }
+
+            .sidebar-user {
+                padding: 0;
+            }
+
+            .logout-button {
+                width: auto;
+                min-width: 105px;
+            }
+
+            .dashboard-panels {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media(max-width: 600px) {
+            .dashboard-main {
+                padding: 19px 14px;
+            }
+
+            .dashboard-header h1 {
+                font-size: 21px;
+            }
+
+            .dashboard-header p {
+                max-width: 250px;
+                font-size: 10px;
+            }
+
+            .header-user-info {
+                display: none;
+            }
+
+            .stats-grid {
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 14px;
+            }
+
+            .stat-card h3 {
+                font-size: 24px;
+            }
+
+            .stat-top > span:first-child {
+                font-size: 9px;
+            }
+
+            .section-heading {
+                align-items: flex-start;
+            }
+
+            .data-status {
+                font-size: 9px;
+            }
+
+            .dashboard-panel {
+                padding: 15px;
+            }
+
+            .chart-canvas-container {
+                height: 235px;
+            }
+
+            .risk-summary {
+                gap: 5px;
+            }
+
+            .risk-summary-item {
+                font-size: 8px;
+            }
+
+            .activity-table th,
+            .activity-table td {
+                padding: 11px;
+            }
+        }
+
+        @media(max-width: 400px) {
+            .sidebar-nav {
+                display: grid;
+                grid-template-columns: repeat(2,minmax(0,1fr));
+            }
+
+            .nav-link {
+                font-size: 9px;
+            }
+
+            .section-heading {
+                flex-direction: column;
+            }
+
+            .data-status {
+                align-self: flex-start;
+            }
+
+            .risk-summary-item {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media(prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                transition-duration: .01ms !important;
+            }
+        }
+    </style>
 </head>
-<body class="dashboard-page">
+
+<body>
 
 <div class="dashboard-layout">
 
+    <!-- =========================
+         SHARED SIDEBAR
+    ========================== -->
+
     <aside class="sidebar">
-        <div class="sidebar-brand brand">
-            <div class="brand-icon">C</div>
+
+        <div class="sidebar-brand">
+            <div class="brand-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/>
+                    <path d="m9 12 2 2 4-4"/>
+                </svg>
+            </div>
             <span>ChurnGuard<span class="brand-accent"> AI</span></span>
         </div>
 
         <div class="sidebar-section-label">WORKSPACE</div>
 
         <nav class="sidebar-nav">
+
             <a href="dashboard.html" class="nav-link active">
-                <span>▦</span> Dashboard
+                <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="14" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/>
+                </svg>
+                Dashboard
             </a>
+
             <a href="customers.html" class="nav-link">
-                <span>♙</span> Customers
+                <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="10" cy="7" r="4"/>
+                    <path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                Customers
             </a>
+
             <a href="prediction.html" class="nav-link">
-                <span>⌁</span> Churn Prediction
+                <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 17 9 11l4 4 8-9"/>
+                    <path d="M15 6h6v6"/>
+                </svg>
+                Churn Prediction
             </a>
+
             <a href="analytics.html" class="nav-link">
-                <span>▥</span> Analytics
+                <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 3v18h18"/>
+                    <path d="M18 17V9M13 17V5M8 17v-3"/>
+                </svg>
+                Analytics
             </a>
-            <a href="retention.html" class="nav-link">
-                <span>◎</span> Retention Center
+
+            <a href="retention.html" class="nav-link ">
+                <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/>
+                </svg>
+                Retention Center
             </a>
+
             <a href="reports.html" class="nav-link">
-                <span>▤</span> Reports
+                <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <path d="M14 2v6h6M8 13h8M8 17h8M8 9h2"/>
+                </svg>
+                Reports
             </a>
+
         </nav>
 
         <div class="sidebar-bottom">
+
             <div class="sidebar-user">
                 <div class="user-avatar" id="user-avatar">U</div>
+
                 <div class="user-details">
                     <strong id="sidebar-user-name">Loading...</strong>
                     <span id="sidebar-user-role">User</span>
                 </div>
             </div>
+
             <button id="logout-button" class="logout-button">
-                ↪ Sign out
+                ↪ &nbsp; Sign out
             </button>
+
         </div>
+
     </aside>
+
+
+    <!-- =========================
+         MAIN DASHBOARD
+    ========================== -->
 
     <main class="dashboard-main">
 
+        <!-- HEADER -->
         <header class="dashboard-header">
+
             <div>
                 <h1>Dashboard</h1>
                 <p>Welcome back! Here's your customer intelligence overview.</p>
             </div>
 
             <div class="header-user">
+
                 <div class="header-user-info">
                     <strong id="header-user-name">Loading...</strong>
                     <span>ChurnGuard Workspace</span>
                 </div>
-                <div class="user-avatar">U</div>
+
+                <div class="user-avatar" id="header-user-avatar">U</div>
+
             </div>
+
         </header>
+
 
         <section class="dashboard-content">
 
+            <!-- BUSINESS OVERVIEW -->
             <div class="section-heading">
+
                 <div>
                     <h2>Business Overview</h2>
                     <p>Your customer data at a glance</p>
                 </div>
+
                 <span class="data-status">
                     <span class="status-dot"></span>
                     Connected workspace
                 </span>
+
             </div>
 
+
+            <!-- KPI CARDS -->
             <div class="stats-grid">
 
+                <!-- TOTAL CUSTOMERS -->
                 <article class="stat-card">
+
                     <div class="stat-top">
                         <span>Total Customers</span>
-                        <span class="stat-icon blue">♙</span>
+
+                        <span class="stat-icon blue">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="10" cy="7" r="4"/>
+                                <path d="M20 21v-2a4 4 0 0 0-3-3.87"/>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                        </span>
                     </div>
+
                     <h3 id="total-customers">—</h3>
                     <p>Registered customers</p>
+
                 </article>
 
+
+                <!-- HISTORICAL CHURN -->
                 <article class="stat-card">
+
                     <div class="stat-top">
                         <span>Historical Churn</span>
-                        <span class="stat-icon orange">⌁</span>
+
+                        <span class="stat-icon orange">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M3 17l6-6 4 3 8-9"/>
+                                <path d="M15 5h6v6"/>
+                            </svg>
+                        </span>
                     </div>
+
                     <h3 id="churned-customers">—</h3>
                     <p>Customers who previously churned</p>
+
                 </article>
 
+
+                <!-- CHURN RATE -->
                 <article class="stat-card">
+
                     <div class="stat-top">
                         <span>Churn Rate</span>
-                        <span class="stat-icon purple">%</span>
+
+                        <span class="stat-icon purple">
+                            <svg viewBox="0 0 24 24">
+                                <path d="m19 5-14 14"/>
+                                <circle cx="6.5" cy="6.5" r="2.5"/>
+                                <circle cx="17.5" cy="17.5" r="2.5"/>
+                            </svg>
+                        </span>
                     </div>
+
                     <h3 id="churn-rate">—</h3>
                     <p>Historical customer churn percentage</p>
+
                 </article>
 
+
+                <!-- HIGH RISK -->
                 <article class="stat-card">
+
                     <div class="stat-top">
                         <span>High-Risk Customers</span>
-                        <span class="stat-icon red">!</span>
+
+                        <span class="stat-icon red">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 9v4"/>
+                                <path d="M12 17h.01"/>
+                                <path d="M10.3 3.9 2.5 17.5A2 2 0 0 0 4.2 20h15.6a2 2 0 0 0 1.7-2.5L13.7 3.9a2 2 0 0 0-3.4 0Z"/>
+                            </svg>
+                        </span>
                     </div>
+
                     <h3 id="high-risk-customers">—</h3>
                     <p>Awaiting model risk predictions</p>
+
                 </article>
 
             </div>
 
+
+            <!-- CHARTS -->
             <div class="dashboard-panels">
 
+                <!-- CHURN DISTRIBUTION -->
                 <section class="dashboard-panel chart-panel">
+
                     <div class="panel-heading">
+
                         <div>
                             <h3>Customer Churn Analytics</h3>
-                            <p>Churn trends and customer distribution</p>
+                            <p>Churn and customer distribution</p>
                         </div>
+
                         <span class="panel-tag">Live dataset</span>
+
                     </div>
 
-                    <div style="position: relative; height: 280px; width: 100%;">
+                    <div class="chart-canvas-container">
                         <canvas id="churn-distribution-chart"></canvas>
                     </div>
+
                 </section>
 
-                
-<section class="dashboard-panel risk-panel">
-    <div class="panel-heading">
-        <div>
-            <h3>Customer Risk Overview</h3>
-            <p>Latest prediction risk distribution</p>
-        </div>
-        <span class="panel-tag">Live predictions</span>
-    </div>
 
-    <div class="risk-chart-container">
-        <canvas id="risk-distribution-chart"></canvas>
-    </div>
+                <!-- CUSTOMER RISK -->
+                <section class="dashboard-panel risk-panel">
 
-    <div id="risk-summary" class="risk-summary">
-        <div class="risk-summary-item">
-            <span class="risk-indicator low"></span>
-            <span>Low Risk</span>
-            <strong id="low-risk-count">0</strong>
-        </div>
+                    <div class="panel-heading">
 
-        <div class="risk-summary-item">
-            <span class="risk-indicator medium"></span>
-            <span>Medium Risk</span>
-            <strong id="medium-risk-count">0</strong>
-        </div>
+                        <div>
+                            <h3>Customer Risk Overview</h3>
+                            <p>Latest prediction risk distribution</p>
+                        </div>
 
-        <div class="risk-summary-item">
-            <span class="risk-indicator high"></span>
-            <span>High Risk</span>
-            <strong id="high-risk-count">0</strong>
-        </div>
-    </div>
+                        <span class="panel-tag">Live predictions</span>
 
-    <div id="risk-empty-state" class="empty-state" hidden>
-        <div class="empty-chart-icon">◎</div>
-        <h4>No risk data yet</h4>
-        <p>Run churn predictions to view customer risk levels.</p>
-    </div>
-</section>
+                    </div>
 
+                    <div class="risk-chart-container">
+                        <canvas id="risk-distribution-chart"></canvas>
+                    </div>
+
+                    <div id="risk-summary" class="risk-summary">
+
+                        <div class="risk-summary-item">
+                            <span class="risk-indicator low"></span>
+                            <span>Low Risk</span>
+                            <strong id="low-risk-count">0</strong>
+                        </div>
+
+                        <div class="risk-summary-item">
+                            <span class="risk-indicator medium"></span>
+                            <span>Medium Risk</span>
+                            <strong id="medium-risk-count">0</strong>
+                        </div>
+
+                        <div class="risk-summary-item">
+                            <span class="risk-indicator high"></span>
+                            <span>High Risk</span>
+                            <strong id="high-risk-count">0</strong>
+                        </div>
+
+                    </div>
+
+                    <div id="risk-empty-state" class="empty-state" hidden>
+
+                        <div class="empty-chart-icon">◎</div>
+
+                        <h4>No risk data yet</h4>
+
+                        <p>Run churn predictions to view customer risk levels.</p>
+
+                    </div>
+
+                </section>
 
             </div>
 
 
-<section class="dashboard-panel activity-panel">
-    <div class="panel-heading">
-        <div>
-            <h3>Recent Prediction Activity</h3>
-            <p>Latest customer prediction records</p>
-        </div>
-        <span class="panel-tag">Recent activity</span>
-    </div>
+            <!-- RECENT PREDICTIONS -->
+            <section class="dashboard-panel activity-panel">
 
-    <div id="activity-empty" class="activity-empty" hidden>
-        No prediction activity is available yet.
-    </div>
+                <div class="panel-heading">
 
-    <div id="activity-content" class="activity-table-wrapper" hidden>
-        <table class="activity-table">
-            <thead>
-                <tr>
-                    <th>Customer ID</th>
-                    <th>Churn Probability</th>
-                    <th>Prediction</th>
-                    <th>Risk Level</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
+                    <div>
+                        <h3>Recent Prediction Activity</h3>
+                        <p>Latest customer prediction records</p>
+                    </div>
 
-            <tbody id="recent-predictions-body">
-            </tbody>
-        </table>
-    </div>
-</section>
+                    <span class="panel-tag">Recent activity</span>
+
+                </div>
+
+                <div id="activity-empty" class="activity-empty" hidden>
+                    No prediction activity is available yet.
+                </div>
+
+                <div id="activity-content" class="activity-table-wrapper" hidden>
+
+                    <table class="activity-table">
+
+                        <thead>
+                            <tr>
+                                <th>Customer ID</th>
+                                <th>Churn Probability</th>
+                                <th>Prediction</th>
+                                <th>Risk Level</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="recent-predictions-body"></tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
 
 
+            <!-- FOOTER -->
             <footer class="dashboard-footer">
-                ChurnGuard AI · Customer Intelligence Platform
+                © 2026 ChurnGuard AI · Customer Intelligence Platform
             </footer>
 
         </section>
+
     </main>
 
 </div>

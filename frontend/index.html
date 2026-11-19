@@ -1,87 +1,348 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#f4f8ff">
+    <meta name="theme-color" content="#f1f5f9">
+
     <title>Sign In | ChurnGuard AI</title>
-    <link rel="stylesheet" href="./css/style.css">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+
     <script src="./js/api.js" defer></script>
     <script src="./js/auth.js" defer></script>
-</head>
-<body class="login-page">
 
-    <main class="login-layout">
-        <section class="login-brand-panel">
-            <div class="brand brand-large">
-                <div class="brand-icon">C</div>
-                <span>ChurnGuard<span class="brand-accent"> AI</span></span>
+    <style>
+
+/* LOGIN PAGE COLOR CORRECTION */
+
+body {
+    background: #f1f5f9 !important;
+    color: #172554 !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* Left branding panel */
+.brand-gradient {
+    background: linear-gradient(145deg, #102b62, #1749a5 55%,#101d35) !important;
+}
+
+.brand-gradient h1,
+.brand-gradient span,
+.brand-gradient p {
+    color: #ffffff !important;
+}
+
+.brand-gradient h1 span {
+    color: #bfdbfe !important;
+}
+
+.brand-gradient .text-blue-100,
+.brand-gradient .text-blue-200 {
+    color: #dbeafe !important;
+}
+
+/* Right login panel */
+.login-panel {
+    background: #f1f5f9 !important;
+}
+
+.login-panel h2 {
+    color: #0f172a !important;
+}
+
+.login-panel p {
+    color: #475569 !important;
+}
+
+.login-panel label {
+    color: #1e293b !important;
+    font-weight: 700 !important;
+}
+
+/* Input fields */
+.login-panel input {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #94a3b8 !important;
+}
+
+.login-panel input::placeholder {
+    color: #64748b !important;
+    opacity: 1 !important;
+}
+
+/* Login button */
+.login-panel button[type="submit"] {
+    background:#101d35 !important;
+    color: #ffffff !important;
+}
+
+.login-panel button[type="submit"]:hover {
+    background: #1e40af !important;
+}
+
+/* Password toggle */
+.login-panel #toggle-password {
+    background: transparent !important;
+    color:#101d35 !important;
+}
+
+/* Security and footer */
+.login-panel .security-box {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+}
+
+.login-panel .security-box p:first-child {
+    color: #0f172a !important;
+}
+
+.login-panel .security-box p:last-child,
+.login-panel .footer-text {
+    color: #475569 !important;
+}
+
+/* Error messages */
+#login-message {
+    background: #fef2f2 !important;
+    color: #991b1b !important;
+    border: 1px solid #fca5a5 !important;
+}
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: #f1f5f9;
+        }
+
+        .brand-gradient {
+            background: linear-gradient(145deg, #102b62 0%, #1749a5 55%,#101d35 100%);
+        }
+
+        .login-pattern {
+            background-image:
+                linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .login-input {
+            color: #172554;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .login-input::placeholder {
+            color: #64748b;
+            opacity: 1;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,.13);
+        }
+
+        .login-submit {
+            transition: background .2s, transform .2s;
+        }
+
+        .login-submit:hover {
+            background: #1e40af;
+            transform: translateY(-1px);
+        }
+
+        .login-submit:disabled {
+            opacity: .65;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert {
+            margin-bottom: 18px;
+            padding: 12px 14px;
+            border: 1px solid #fca5a5;
+            border-radius: 9px;
+            background: #fef2f2;
+            color: #991b1b;
+            font-size: 13px;
+        }
+
+        .alert.success {
+            border-color: #6ee7b7;
+            background: #ecfdf5;
+            color: #065f46;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen bg-blue-100 text-slate-900">
+
+    <main class="grid min-h-screen lg:grid-cols-2">
+
+        <!-- LEFT BRAND PANEL -->
+        <section class="brand-gradient login-pattern relative hidden min-h-screen flex-col justify-between overflow-hidden px-10 py-10 text-white lg:flex xl:px-16">
+
+            <div class="absolute -right-24 -top-24 h-72 w-72 rounded-full border border-white/10"></div>
+            <div class="absolute -bottom-24 -left-20 h-72 w-72 rounded-full bg-white/[0.04]"></div>
+
+            <!-- Brand -->
+            <div class="relative z-10 flex items-center gap-3">
+                <div class="grid h-10 w-10 place-items-center rounded-lg bg-white text-lg font-extrabold text-blue-800">
+                    C
+                </div>
+
+                <span class="text-xl font-extrabold tracking-tight text-white">
+                    ChurnGuard<span class="text-blue-200"> AI</span>
+                </span>
             </div>
 
-            <div class="brand-content">
-                <span class="eyebrow">CUSTOMER INTELLIGENCE PLATFORM</span>
-                <h1>Understand your customers.<br>Prevent churn.</h1>
-                <p>
+            <!-- Main content -->
+            <div class="relative z-10 max-w-lg">
+
+                <span class="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-[10px] font-bold tracking-[1.5px] text-white">
+                    <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
+                    CUSTOMER INTELLIGENCE PLATFORM
+                </span>
+
+                <h1 class="mt-7 text-4xl font-extrabold leading-tight tracking-tight xl:text-[46px]">
+                    Understand your customers.
+                    <span class="text-blue-200">Prevent churn.</span>
+                </h1>
+
+                <p class="mt-5 max-w-md text-sm leading-7 text-blue-100">
                     Turn customer data into actionable intelligence.
                     Identify churn risks, understand customer behavior,
                     and make smarter retention decisions.
                 </p>
 
-                <div class="brand-features">
-                    <div class="feature-item">
-                        <span class="feature-check">✓</span>
-                        Intelligent churn prediction
+                <!-- Features -->
+                <div class="mt-8 space-y-5">
+
+                    <div class="flex items-center gap-3">
+                        <span class="grid h-8 w-8 place-items-center rounded-lg border border-white/20 bg-white/10 font-bold text-emerald-300">✓</span>
+                        <span class="text-sm font-semibold text-white">Intelligent churn prediction</span>
                     </div>
-                    <div class="feature-item">
-                        <span class="feature-check">✓</span>
-                        Customer risk insights
+
+                    <div class="flex items-center gap-3">
+                        <span class="grid h-8 w-8 place-items-center rounded-lg border border-white/20 bg-white/10 font-bold text-emerald-300">✓</span>
+                        <span class="text-sm font-semibold text-white">Customer risk insights</span>
                     </div>
-                    <div class="feature-item">
-                        <span class="feature-check">✓</span>
-                        Data-driven retention strategies
+
+                    <div class="flex items-center gap-3">
+                        <span class="grid h-8 w-8 place-items-center rounded-lg border border-white/20 bg-white/10 font-bold text-emerald-300">✓</span>
+                        <span class="text-sm font-semibold text-white">Data-driven retention strategies</span>
                     </div>
+
                 </div>
             </div>
 
-            <div class="brand-footer">
-                © 2026 ChurnGuard AI. All rights reserved.
+            <!-- Footer -->
+            <div class="relative z-10 border-t border-white/20 pt-5">
+                <p class="text-xs font-medium text-blue-100">
+                    © 2026 ChurnGuard AI. All rights reserved.
+                </p>
             </div>
+
         </section>
 
-        <section class="login-form-panel">
-            <div class="login-card">
-                <div class="mobile-brand brand">
-                    <div class="brand-icon">C</div>
-                    <span>ChurnGuard<span class="brand-accent"> AI</span></span>
-                </div>
 
-                <div class="login-heading">
-                    <span class="eyebrow">WELCOME BACK</span>
-                    <h2>Sign in to your account</h2>
-                    <p>Enter your credentials to access your workspace.</p>
-                </div>
+        <!-- RIGHT LOGIN PANEL -->
+        <section class="flex min-h-screen items-center justify-center bg-slate-100 px-5 py-8 sm:px-8">
 
-                <div id="login-message" class="alert" role="alert" hidden></div>
+            <div class="w-full max-w-[390px]">
 
-                <form id="login-form">
-                    <div class="form-group">
-                        <label for="email">Email address</label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            placeholder="you@company.com"
-                            autocomplete="username"
-                            required
-                        >
+                <!-- Mobile brand -->
+                <div class="mb-9 flex items-center gap-3 lg:hidden">
+                    <div class="grid h-10 w-10 place-items-center rounded-lg bg-blue-700 text-lg font-extrabold text-white">
+                        C
                     </div>
 
-                    <div class="form-group">
-                        <div class="password-label-row">
-                            <label for="password">Password</label>
-                        </div>
+                    <span class="text-xl font-extrabold text-slate-900">
+                        ChurnGuard<span class="text-blue-700"> AI</span>
+                    </span>
+                </div>
 
-                        <div class="password-wrapper">
+                <!-- Login heading -->
+                <div class="mb-7">
+
+                    <span class="text-xs font-extrabold tracking-[1.8px] text-blue-700">
+                        WELCOME BACK
+                    </span>
+
+                    <h2 class="mt-3 text-[27px] font-extrabold tracking-tight text-slate-950">
+                        Sign in to your account
+                    </h2>
+
+                    <p class="mt-2 text-sm leading-6 text-slate-600">
+                        Enter your credentials to access your workspace.
+                    </p>
+
+                </div>
+
+                <!-- Message -->
+                <div id="login-message" class="alert" role="alert" hidden></div>
+
+                <!-- Form -->
+                <form id="login-form" class="space-y-5">
+
+                    <!-- Email -->
+                    <div>
+                        <label for="email" class="mb-2 block text-sm font-bold text-slate-800">
+                            Email address
+                        </label>
+
+                        <div class="relative">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                                <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+                                    <path d="m3 7 9 6 9-6"></path>
+                                </svg>
+                            </div>
+
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="you@company.com"
+                                autocomplete="username"
+                                required
+                                class="login-input h-12 w-full rounded-lg pl-11 pr-4 text-sm font-medium"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <label for="password" class="mb-2 block text-sm font-bold text-slate-800">
+                            Password
+                        </label>
+
+                        <div class="relative">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                                <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <rect x="4" y="10" width="16" height="11" rx="2"></rect>
+                                    <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+                                    <path d="M12 14v3"></path>
+                                </svg>
+                            </div>
+
                             <input
                                 type="password"
                                 id="password"
@@ -89,28 +350,63 @@
                                 placeholder="Enter your password"
                                 autocomplete="current-password"
                                 required
+                                class="login-input h-12 w-full rounded-lg pl-11 pr-16 text-sm font-medium"
                             >
+
                             <button
                                 type="button"
                                 id="toggle-password"
-                                class="password-toggle"
+                                class="absolute inset-y-0 right-0 px-4 text-xs font-bold text-blue-700 hover:text-blue-900"
                                 aria-label="Show password"
-                            >Show</button>
+                            >
+                                Show
+                            </button>
                         </div>
                     </div>
 
-                    <button type="submit" id="login-button" class="primary-button">
+                    <!-- Submit button -->
+                    <button
+                        type="submit"
+                        id="login-button"
+                        class="login-submit flex h-12 w-full items-center justify-between rounded-lg bg-blue-700 px-5 text-sm font-bold text-white shadow-md shadow-blue-200"
+                    >
                         <span id="login-button-text">Sign in</span>
-                        <span aria-hidden="true">→</span>
+                        <span aria-hidden="true" class="text-lg">→</span>
                     </button>
+
                 </form>
 
-                <div class="login-security">
-                    <span class="security-icon">●</span>
-                    Secure access to your customer intelligence workspace
+                <!-- Security -->
+                <div class="mt-7 flex items-center gap-3 rounded-lg border border-slate-300 bg-white px-3.5 py-3.5">
+                    <div class="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-emerald-100 text-emerald-800">
+                        <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <rect x="4" y="10" width="16" height="11" rx="2"></rect>
+                            <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+                            <path d="m9 15 2 2 4-4"></path>
+                        </svg>
+                    </div>
+
+                    <div>
+                        <p class="text-xs font-bold text-slate-900">
+                            Secure workspace access
+                        </p>
+                        <p class="mt-1 text-[11px] text-slate-600">
+                            Your customer intelligence workspace is protected.
+                        </p>
+                    </div>
                 </div>
+
+                <!-- Footer -->
+                <div class="mt-8 text-center">
+                    <p class="text-xs text-slate-600">
+                        © 2026 ChurnGuard AI. All rights reserved.
+                    </p>
+                </div>
+
             </div>
+
         </section>
+
     </main>
 
 </body>

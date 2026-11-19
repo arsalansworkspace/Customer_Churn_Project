@@ -4,47 +4,886 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#17243b">
     <title>Churn Prediction | ChurnGuard AI</title>
+
+    <!-- Consistent ChurnGuard typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="../css/style.css">
-    <script src="../js/api.js" defer></script>
-    <script src="../js/prediction.js" defer></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    },
+                    colors: {
+                        cg: {
+                            navy: '#17243b',
+                            'navy-light': '#243650',
+                            gold: '#c5a46d',
+                            ivory: '#f7f6f2',
+                            ink: '#19283d',
+                            muted: '#778397',
+                            border: '#e9e6df'
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+
+    <style>
+        :root {
+            --cg-ink: #19283d;
+            --cg-muted: #778397;
+            --cg-ivory: #f7f6f2;
+            --cg-white: #fff;
+            --cg-navy: #17243b;
+            --cg-navy-soft: #243650;
+            --cg-gold: #c5a46d;
+            --cg-gold-light: #f3ecdf;
+            --cg-border: #e9e6df;
+            --cg-green: #47866d;
+            --cg-red: #bd6461;
+            --cg-amber: #b68a4d;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            color: var(--cg-ink);
+            background: var(--cg-ivory);
+            line-height: 1.55;
+        }
+
+        button, input, select {
+            font-family: inherit;
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        a:focus-visible {
+            outline: 3px solid rgba(197,164,109,.35);
+            outline-offset: 3px;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        /* Application layout */
+
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Shared sidebar */
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+            width: 248px;
+            padding: 27px 18px 19px;
+            background: var(--cg-navy);
+            border-right: 1px solid rgba(255,255,255,.06);
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            margin: 0 0 47px;
+            padding: 0 5px;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -.7px;
+        }
+
+        .brand-symbol {
+            display: grid;
+            place-items: center;
+            width: 37px;
+            height: 37px;
+            flex-shrink: 0;
+            border: 1px solid rgba(225,199,153,.55);
+            border-radius: 10px;
+            background: rgba(197,164,109,.13);
+            color: #e0c493;
+        }
+
+        .brand-symbol svg {
+            width: 23px;
+            height: 23px;
+        }
+
+        .brand-accent {
+            color: #d4b780;
+        }
+
+        .sidebar-section-label {
+            margin: 0 0 13px 10px;
+            color: #8995a4;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1.65px;
+        }
+
+        .sidebar-nav {
+            display: grid;
+            gap: 6px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 43px;
+            padding: 0 12px;
+            border: 1px solid transparent;
+            border-radius: 7px;
+            color: #b4bdc8;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: .2s ease;
+        }
+
+        .nav-link svg {
+            width: 17px;
+            height: 17px;
+            flex-shrink: 0;
+            stroke: currentColor;
+            stroke-width: 1.7;
+            fill: none;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,.055);
+            color: #fff;
+        }
+
+        .nav-link.active {
+            border-color: rgba(197,164,109,.18);
+            background: rgba(197,164,109,.12);
+            color: #e2c795;
+            font-weight: 700;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            padding-top: 17px;
+            border-top: 1px solid rgba(255,255,255,.12);
+        }
+
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px;
+        }
+
+        .user-avatar {
+            display: grid;
+            flex-shrink: 0;
+            place-items: center;
+            width: 35px;
+            height: 35px;
+            border: 1px solid rgba(197,164,109,.35);
+            border-radius: 50%;
+            background: rgba(197,164,109,.13);
+            color: #e2c795;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .user-details {
+            display: grid;
+            min-width: 0;
+        }
+
+        .user-details strong {
+            overflow: hidden;
+            color: #f0f1f2;
+            font-size: 11px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-details span {
+            color: #9ba7b5;
+            font-size: 10px;
+        }
+
+        .logout-button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            margin-top: 12px;
+            padding: 10px;
+            border: 0;
+            border-radius: 7px;
+            background: transparent;
+            color: #b3bdc9;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            transition: .2s;
+        }
+
+        .logout-button svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+        }
+
+        .logout-button:hover {
+            background: rgba(189,100,97,.13);
+            color: #e5a09c;
+        }
+
+        /* Main content */
+
+        .dashboard-main {
+            width: calc(100% - 248px);
+            min-height: 100vh;
+            margin-left: 248px;
+        }
+
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 83px;
+            padding: 15px 35px;
+            border-bottom: 1px solid var(--cg-border);
+            background: rgba(255,255,255,.94);
+        }
+
+        .dashboard-header h1 {
+            color: var(--cg-ink);
+            font-size: 19px;
+            font-weight: 800;
+            letter-spacing: -.55px;
+        }
+
+        .dashboard-header p {
+            margin-top: 3px;
+            color: var(--cg-muted);
+            font-size: 11px;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .header-user-info {
+            display: grid;
+            text-align: right;
+        }
+
+        .header-user-info strong {
+            color: var(--cg-ink);
+            font-size: 11px;
+        }
+
+        .header-user-info span {
+            color: var(--cg-muted);
+            font-size: 10px;
+        }
+
+        .header-avatar {
+            display: grid;
+            place-items: center;
+            width: 35px;
+            height: 35px;
+            border: 1px solid #e8ddc8;
+            border-radius: 50%;
+            background: var(--cg-gold-light);
+            color: #8c7046;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .dashboard-content {
+            width: 100%;
+            max-width: 1550px;
+            margin: 0 auto;
+            padding: 32px 35px;
+        }
+
+        /* Page introduction */
+
+        .section-heading {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .prediction-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: #9a8055;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1.7px;
+            text-transform: uppercase;
+        }
+
+        .prediction-eyebrow::before {
+            width: 19px;
+            height: 1px;
+            background: var(--cg-gold);
+            content: "";
+        }
+
+        .section-heading h2 {
+            color: var(--cg-ink);
+            font-size: 23px;
+            font-weight: 800;
+            letter-spacing: -.8px;
+        }
+
+        .section-heading p {
+            margin-top: 6px;
+            color: var(--cg-muted);
+            font-size: 11px;
+        }
+
+        .data-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 12px;
+            border: 1px solid #e6e4dc;
+            border-radius: 6px;
+            background: rgba(255,255,255,.72);
+            color: #788394;
+            font-size: 10px;
+            font-weight: 650;
+            white-space: nowrap;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #579777;
+            box-shadow: 0 0 0 3px rgba(87,151,119,.12);
+        }
+
+        /* Panels */
+
+        .dashboard-panel {
+            margin-bottom: 19px;
+            overflow: hidden;
+            border: 1px solid var(--cg-border);
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 5px 20px rgba(30,43,59,.03);
+        }
+
+        .prediction-panel-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 19px 21px;
+            border-bottom: 1px solid var(--cg-border);
+        }
+
+        .prediction-panel-heading h3 {
+            color: var(--cg-ink);
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .prediction-panel-heading p {
+            margin-top: 4px;
+            color: var(--cg-muted);
+            font-size: 10px;
+        }
+
+        .prediction-panel-heading::after {
+            width: 29px;
+            height: 29px;
+            flex-shrink: 0;
+            border: 1px solid #eee5d6;
+            border-radius: 7px;
+            background: var(--cg-gold-light);
+            content: "";
+        }
+
+        /* Search section */
+
+        .prediction-search-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 20px 21px 14px;
+        }
+
+        .customer-search {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            width: 100%;
+            max-width: 470px;
+            height: 41px;
+            padding: 0 12px;
+            border: 1px solid #e8e6e0;
+            border-radius: 6px;
+            background: #fcfcfa;
+            color: #8993a1;
+            transition: .2s;
+        }
+
+        .customer-search:focus-within {
+            border-color: var(--cg-gold);
+            box-shadow: 0 0 0 3px rgba(197,164,109,.12);
+        }
+
+        .customer-search svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+        }
+
+        .customer-search input {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            outline: 0;
+            background: transparent;
+            color: var(--cg-ink);
+            font-size: 11px;
+        }
+
+        .customer-search input::placeholder {
+            color: #a3aab4;
+        }
+
+        .add-customer-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 41px;
+            padding: 0 16px;
+            border: 1px solid var(--cg-navy);
+            border-radius: 6px;
+            background: var(--cg-navy);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .add-customer-button:hover:not(:disabled) {
+            border-color: #304761;
+            background: #304761;
+            box-shadow: 0 4px 12px rgba(23,36,59,.13);
+        }
+
+        .add-customer-button:disabled {
+            cursor: not-allowed;
+            opacity: .5;
+        }
+
+        .add-customer-button svg {
+            width: 15px;
+            height: 15px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+
+        .customer-message {
+            margin: 0 21px 15px;
+            padding: 11px 13px;
+            border: 1px solid #efd4d2;
+            border-radius: 6px;
+            background: #fff4f3;
+            color: #a64e4b;
+            font-size: 11px;
+        }
+
+        .customer-message.success {
+            border-color: #d5e8dc;
+            background: #f0f8f2;
+            color: #42795b;
+        }
+
+        .prediction-customer-results {
+            padding: 0 21px 20px;
+        }
+
+        .prediction-empty-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            min-height: 135px;
+            padding: 22px;
+            border: 1px dashed #e5e2da;
+            border-radius: 8px;
+            background: #fcfbf9;
+            color: #8b95a2;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        .prediction-empty-state h3 {
+            margin-top: 10px;
+            color: #45546a;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .prediction-empty-state p {
+            max-width: 350px;
+            margin-top: 5px;
+            color: #929ba6;
+            font-size: 10px;
+            line-height: 1.7;
+        }
+
+        .prediction-empty-icon {
+            display: grid;
+            place-items: center;
+            width: 42px;
+            height: 42px;
+            border: 1px solid #eadfc9;
+            border-radius: 11px;
+            background: var(--cg-gold-light);
+            color: #9a8055;
+            font-size: 24px;
+        }
+
+        /* Selected customer */
+
+        .selected-customer-panel {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            margin: 0 21px 20px;
+            padding: 17px 18px;
+            border: 1px solid #e7dfd0;
+            border-radius: 8px;
+            background: linear-gradient(110deg,#fcfaf5,#fff);
+        }
+
+        .selected-customer-panel .eyebrow {
+            display: block;
+            margin-bottom: 5px;
+            color: #a08354;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+        }
+
+        .selected-customer-panel h3 {
+            color: var(--cg-ink);
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .selected-customer-panel p {
+            margin-top: 4px;
+            color: var(--cg-muted);
+            font-size: 10px;
+        }
+
+        /* Prediction result */
+
+        .prediction-result-content {
+            padding: 21px;
+        }
+
+        .prediction-result-content .prediction-empty-state {
+            min-height: 195px;
+        }
+
+        /* Tables */
+
+        .prediction-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .customer-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .customer-table th {
+            padding: 14px 17px;
+            border-bottom: 1px solid #eeece7;
+            background: #faf9f6;
+            color: #87909c;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: .65px;
+            text-transform: uppercase;
+        }
+
+        .customer-table td {
+            padding: 14px 17px;
+            border-top: 1px solid #f0efeb;
+            color: #667284;
+            font-size: 10px;
+        }
+
+        .customer-table tbody tr {
+            transition: background .15s;
+        }
+
+        .customer-table tbody tr:hover {
+            background: #fcfbf8;
+        }
+
+        .table-placeholder {
+            height: 105px;
+            color: #929ba6 !important;
+            font-size: 11px !important;
+            text-align: center;
+        }
+
+        .dashboard-footer {
+            padding: 24px 0 5px;
+            color: #a1a49f;
+            font-size: 9px;
+            text-align: center;
+        }
+
+        /* Responsive */
+
+        @media(max-width:1100px) {
+            .dashboard-content {
+                padding: 27px 23px;
+            }
+
+            .dashboard-header {
+                padding-right: 23px;
+                padding-left: 23px;
+            }
+        }
+
+        @media(max-width:760px) {
+            .sidebar {
+                position: static;
+                width: 100%;
+                padding: 13px 14px;
+                border-right: 0;
+                border-bottom: 1px solid rgba(255,255,255,.08);
+            }
+
+            .dashboard-layout {
+                display: block;
+            }
+
+            .sidebar-brand {
+                margin-bottom: 14px;
+            }
+
+            .sidebar-section-label,
+            .sidebar-bottom {
+                display: none;
+            }
+
+            .sidebar-nav {
+                display: flex;
+                gap: 5px;
+                overflow-x: auto;
+                padding-bottom: 3px;
+            }
+
+            .nav-link {
+                min-height: 36px;
+                flex-shrink: 0;
+                padding: 0 10px;
+                font-size: 10px;
+            }
+
+            .nav-link svg {
+                width: 15px;
+                height: 15px;
+            }
+
+            .dashboard-main {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .dashboard-header {
+                min-height: 70px;
+                padding: 13px 17px;
+            }
+
+            .dashboard-content {
+                padding: 22px 16px;
+            }
+
+            .header-user-info {
+                display: none;
+            }
+        }
+
+        @media(max-width:520px) {
+            .section-heading {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .data-status {
+                align-self: flex-start;
+            }
+
+            .prediction-search-row {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .customer-search {
+                max-width: none;
+            }
+
+            .prediction-search-row .add-customer-button {
+                width: 100%;
+            }
+
+            .selected-customer-panel {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .selected-customer-panel .add-customer-button {
+                width: 100%;
+            }
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                animation-duration: .01ms !important;
+                transition-duration: .01ms !important;
+            }
+        }
+    </style>
 </head>
+
 <body class="dashboard-page">
 
 <div class="dashboard-layout">
 
+    <!-- Shared ChurnGuard sidebar -->
     <aside class="sidebar">
-        <div class="sidebar-brand brand">
-            <div class="brand-icon">C</div>
+
+        <div class="sidebar-brand">
+            <div class="brand-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/>
+                    <path d="m9 12 2 2 4-4"/>
+                </svg>
+            </div>
             <span>ChurnGuard<span class="brand-accent"> AI</span></span>
         </div>
 
         <div class="sidebar-section-label">WORKSPACE</div>
 
         <nav class="sidebar-nav">
+
             <a href="dashboard.html" class="nav-link">
-                <span>▦</span> Dashboard
+                <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="14" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/>
+                </svg>
+                Dashboard
             </a>
+
             <a href="customers.html" class="nav-link">
-                <span>♙</span> Customers
+                <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="10" cy="7" r="4"/>
+                    <path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                Customers
             </a>
+
             <a href="prediction.html" class="nav-link active">
-                <span>⌁</span> Churn Prediction
+                <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 17 9 11l4 4 8-9"/>
+                    <path d="M15 6h6v6"/>
+                </svg>
+                Churn Prediction
             </a>
-            <a href="analytics.html" class="nav-link">
-                <span>▥</span> Analytics
+
+            <a href="analytics.html" class="nav-link ">
+                <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 3v18h18"/>
+                    <path d="M18 17V9M13 17V5M8 17v-3"/>
+                </svg>
+                Analytics
             </a>
+
             <a href="retention.html" class="nav-link">
-                <span>◎</span> Retention Center
+                <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/>
+                </svg>
+                Retention Center
             </a>
+
             <a href="reports.html" class="nav-link">
-                <span>▤</span> Reports
+                <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <path d="M14 2v6h6M8 13h8M8 17h8M8 9h2"/>
+                </svg>
+                Reports
             </a>
+
         </nav>
 
         <div class="sidebar-bottom">
+
             <div class="sidebar-user">
                 <div class="user-avatar" id="user-avatar">U</div>
+
                 <div class="user-details">
                     <strong id="sidebar-user-name">Loading...</strong>
                     <span id="sidebar-user-role">User</span>
@@ -52,11 +891,14 @@
             </div>
 
             <button id="logout-button" class="logout-button">
-                ↪ Sign out
+                ↪ &nbsp; Sign out
             </button>
+
         </div>
+
     </aside>
 
+    <!-- Main -->
     <main class="dashboard-main">
 
         <header class="dashboard-header">
@@ -70,14 +912,16 @@
                     <strong id="header-user-name">Loading...</strong>
                     <span>ChurnGuard Workspace</span>
                 </div>
-                <div class="user-avatar" id="header-avatar">U</div>
+                <div class="header-avatar" id="header-avatar">U</div>
             </div>
         </header>
 
         <section class="dashboard-content">
 
+            <!-- Page introduction -->
             <div class="section-heading">
                 <div>
+                    <div class="prediction-eyebrow">AI-powered intelligence</div>
                     <h2>Customer Churn Intelligence</h2>
                     <p>Select a customer to generate an AI-powered churn prediction.</p>
                 </div>
@@ -99,21 +943,29 @@
                 </div>
 
                 <div class="prediction-search-row">
-                    <div class="customer-search prediction-search">
-                        <span>⌕</span>
+                    <label class="customer-search prediction-search">
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="10.8" cy="10.8" r="6.8"/>
+                            <path d="m16 16 4.5 4.5"/>
+                        </svg>
                         <input
                             type="search"
                             id="prediction-customer-search"
                             placeholder="Enter customer ID or code..."
                             autocomplete="off"
+                            aria-label="Search customer ID"
                         >
-                    </div>
+                    </label>
 
                     <button
                         type="button"
                         id="search-customer-button"
                         class="add-customer-button"
                     >
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="10.8" cy="10.8" r="6.8"/>
+                            <path d="m16 16 4.5 4.5"/>
+                        </svg>
                         Search Customer
                     </button>
                 </div>
@@ -253,6 +1105,9 @@
         </section>
     </main>
 </div>
+
+<script src="../js/api.js" defer></script>
+<script src="../js/prediction.js" defer></script>
 
 </body>
 </html>

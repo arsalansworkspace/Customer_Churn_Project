@@ -1,132 +1,1307 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#17243b">
     <title>Customers | ChurnGuard AI</title>
+
+    <!-- Consistent typography across ChurnGuard -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="../css/style.css">
-    <script src="../js/api.js" defer></script>
-    <script src="../js/customers.js" defer></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    },
+                    colors: {
+                        cg: {
+                            navy: '#17243b',
+                            'navy-light': '#243650',
+                            gold: '#c5a46d',
+                            ivory: '#f7f6f2',
+                            ink: '#19283d',
+                            muted: '#778397',
+                            border: '#e9e6df'
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+
+    <style>
+        :root {
+            --cg-ink: #19283d;
+            --cg-muted: #778397;
+            --cg-ivory: #f7f6f2;
+            --cg-white: #fff;
+            --cg-navy: #17243b;
+            --cg-navy-soft: #243650;
+            --cg-gold: #c5a46d;
+            --cg-gold-light: #f3ecdf;
+            --cg-border: #e9e6df;
+            --cg-green: #47866d;
+            --cg-red: #bd6461;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            color: var(--cg-ink);
+            background: var(--cg-ivory);
+            line-height: 1.55;
+        }
+
+        button, input, select { font: inherit; }
+
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        a:focus-visible {
+            outline: 3px solid rgba(197,164,109,.35);
+            outline-offset: 3px;
+        }
+
+        [hidden] { display: none !important; }
+
+        /* Application shell */
+
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Shared ChurnGuard sidebar */
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+            width: 248px;
+            padding: 27px 18px 19px;
+            background: var(--cg-navy);
+            border-right: 1px solid rgba(255,255,255,.06);
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            margin: 0 0 47px;
+            padding: 0 5px;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -.7px;
+        }
+
+        .brand-symbol {
+            display: grid;
+            place-items: center;
+            width: 37px;
+            height: 37px;
+            flex-shrink: 0;
+            border: 1px solid rgba(225,199,153,.55);
+            border-radius: 10px;
+            background: rgba(197,164,109,.13);
+            color: #e0c493;
+        }
+
+        .brand-symbol svg { width: 23px; height: 23px; }
+        .brand-accent { color: #d4b780; }
+
+        .sidebar-section-label {
+            margin: 0 0 13px 10px;
+            color: #8995a4;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1.65px;
+        }
+
+        .sidebar-nav { display: grid; gap: 6px; }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 43px;
+            padding: 0 12px;
+            border: 1px solid transparent;
+            border-radius: 7px;
+            color: #b4bdc8;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: .2s ease;
+        }
+
+        .nav-link svg {
+            width: 17px;
+            height: 17px;
+            flex-shrink: 0;
+            stroke: currentColor;
+            stroke-width: 1.7;
+            fill: none;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,.055);
+            color: #fff;
+        }
+
+        .nav-link.active {
+            border-color: rgba(197,164,109,.18);
+            background: rgba(197,164,109,.12);
+            color: #e2c795;
+            font-weight: 700;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            padding-top: 17px;
+            border-top: 1px solid rgba(255,255,255,.12);
+        }
+
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px;
+        }
+
+        .user-avatar {
+            display: grid;
+            flex-shrink: 0;
+            place-items: center;
+            width: 35px;
+            height: 35px;
+            border: 1px solid rgba(197,164,109,.35);
+            border-radius: 50%;
+            background: rgba(197,164,109,.13);
+            color: #e2c795;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .user-details {
+            display: grid;
+            min-width: 0;
+        }
+
+        .user-details strong {
+            overflow: hidden;
+            color: #f0f1f2;
+            font-size: 11px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-details span {
+            color: #9ba7b5;
+            font-size: 10px;
+        }
+
+        .logout-button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            margin-top: 12px;
+            padding: 10px;
+            border: 0;
+            border-radius: 7px;
+            background: transparent;
+            color: #b3bdc9;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            transition: .2s;
+        }
+
+        .logout-button svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+        }
+
+        .logout-button:hover {
+            background: rgba(189,100,97,.13);
+            color: #e5a09c;
+        }
+
+        /* Main area */
+
+        .dashboard-main {
+            width: calc(100% - 248px);
+            min-height: 100vh;
+            margin-left: 248px;
+        }
+
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 83px;
+            padding: 15px 35px;
+            border-bottom: 1px solid var(--cg-border);
+            background: rgba(255,255,255,.94);
+        }
+
+        .dashboard-header h1 {
+            color: var(--cg-ink);
+            font-size: 19px;
+            font-weight: 800;
+            letter-spacing: -.55px;
+        }
+
+        .dashboard-header p {
+            margin-top: 3px;
+            color: var(--cg-muted);
+            font-size: 11px;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .header-user-info {
+            display: grid;
+            text-align: right;
+        }
+
+        .header-user-info strong {
+            color: var(--cg-ink);
+            font-size: 11px;
+        }
+
+        .header-user-info span {
+            color: var(--cg-muted);
+            font-size: 10px;
+        }
+
+        .header-avatar {
+            display: grid;
+            place-items: center;
+            width: 35px;
+            height: 35px;
+            border: 1px solid #e8ddc8;
+            border-radius: 50%;
+            background: var(--cg-gold-light);
+            color: #8c7046;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .dashboard-content {
+            width: 100%;
+            max-width: 1550px;
+            margin: auto;
+            padding: 32px 35px;
+        }
+
+        /* Page heading */
+
+        .customer-page-intro {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .customer-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: #9a8055;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1.7px;
+            text-transform: uppercase;
+        }
+
+        .customer-eyebrow::before {
+            width: 19px;
+            height: 1px;
+            background: var(--cg-gold);
+            content: "";
+        }
+
+        .customer-page-intro h2 {
+            color: var(--cg-ink);
+            font-size: 23px;
+            font-weight: 800;
+            letter-spacing: -.8px;
+        }
+
+        .customer-page-intro p {
+            margin-top: 6px;
+            color: var(--cg-muted);
+            font-size: 11px;
+        }
+
+        .directory-reference {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 12px;
+            border: 1px solid var(--cg-border);
+            border-radius: 7px;
+            background: rgba(255,255,255,.7);
+            color: #7d887f;
+            font-size: 10px;
+            white-space: nowrap;
+        }
+
+        .directory-reference svg {
+            width: 15px;
+            height: 15px;
+            stroke: #9a8055;
+            fill: none;
+            stroke-width: 1.8;
+        }
+
+        /* Summary cards */
+
+        .customer-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2,minmax(0,1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .customer-summary-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-height: 120px;
+            padding: 18px 20px;
+            overflow: hidden;
+            border: 1px solid var(--cg-border);
+            border-radius: 9px;
+            background: #fff;
+            box-shadow: 0 4px 15px rgba(30,43,59,.025);
+            transition: transform .2s, box-shadow .2s;
+        }
+
+        .customer-summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 9px 22px rgba(30,43,59,.06);
+        }
+
+        .customer-summary-card::after {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--cg-gold);
+            content: "";
+        }
+
+        .summary-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .customer-summary-card span {
+            color: #788394;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .summary-icon {
+            display: grid;
+            place-items: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--cg-gold-light);
+            color: #9a8055;
+        }
+
+        .summary-icon svg {
+            width: 17px;
+            height: 17px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.7;
+        }
+
+        .customer-summary-card strong {
+            margin-top: 9px;
+            color: var(--cg-ink);
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -.8px;
+        }
+
+        .customer-summary-card small {
+            margin-top: 2px;
+            color: #9aa2ac;
+            font-size: 10px;
+        }
+
+        /* Directory panel */
+
+        .customer-table-panel {
+            overflow: hidden;
+            border: 1px solid var(--cg-border);
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 5px 20px rgba(30,43,59,.035);
+        }
+
+        .customer-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 20px;
+            border-bottom: 1px solid var(--cg-border);
+        }
+
+        .customer-toolbar h3 {
+            color: var(--cg-ink);
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .customer-toolbar p {
+            margin-top: 4px;
+            color: var(--cg-muted);
+            font-size: 10px;
+        }
+
+        .customer-toolbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .customer-search {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            width: 250px;
+            height: 39px;
+            padding: 0 12px;
+            border: 1px solid #e8e6e0;
+            border-radius: 6px;
+            background: #fcfcfa;
+            color: #8993a1;
+            transition: .2s;
+        }
+
+        .customer-search:focus-within {
+            border-color: var(--cg-gold);
+            box-shadow: 0 0 0 3px rgba(197,164,109,.12);
+        }
+
+        .customer-search svg {
+            width: 15px;
+            height: 15px;
+            flex-shrink: 0;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+        }
+
+        .customer-search input {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            outline: 0;
+            background: transparent;
+            color: var(--cg-ink);
+            font-size: 10px;
+        }
+
+        .customer-search input::placeholder { color: #a3aab4; }
+
+        .add-customer-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 39px;
+            padding: 0 15px;
+            border: 1px solid var(--cg-navy);
+            border-radius: 6px;
+            background: var(--cg-navy);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .add-customer-button:hover {
+            border-color: #304761;
+            background: #304761;
+            box-shadow: 0 4px 12px rgba(23,36,59,.15);
+        }
+
+        .add-customer-button:disabled {
+            cursor: wait;
+            opacity: .6;
+        }
+
+        .add-customer-button svg {
+            width: 14px;
+            height: 14px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+
+        .customer-message {
+            margin: 14px 19px 0;
+            padding: 10px 12px;
+            border: 1px solid #efd4d2;
+            border-radius: 6px;
+            background: #fff4f3;
+            color: #a64e4b;
+            font-size: 11px;
+        }
+
+        .customer-message.success {
+            border-color: #d5e8dc;
+            background: #f0f8f2;
+            color: #42795b;
+        }
+
+        /* Table */
+
+        .customer-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .customer-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .customer-table th {
+            padding: 14px 16px;
+            border-bottom: 1px solid #eeece7;
+            background: #faf9f6;
+            color: #87909c;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: .65px;
+            text-transform: uppercase;
+        }
+
+        .customer-table td {
+            padding: 14px 16px;
+            border-top: 1px solid #f0efeb;
+            color: #667284;
+            font-size: 10px;
+        }
+
+        .customer-table tbody tr { transition: background .15s; }
+        .customer-table tbody tr:hover { background: #fcfbf8; }
+
+        .customer-code {
+            color: #293d53;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .churn-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 9px;
+            border-radius: 5px;
+            font-size: 9px;
+            font-weight: 800;
+        }
+
+        .churn-badge::before {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: currentColor;
+            content: "";
+        }
+
+        .churn-badge.churned {
+            background: #fbefed;
+            color: var(--cg-red);
+        }
+
+        .churn-badge.retained {
+            background: #edf5ef;
+            color: var(--cg-green);
+        }
+
+        .churn-badge.unknown {
+            background: #f1f2f2;
+            color: #7e8792;
+        }
+
+        .view-customer-button {
+            min-height: 28px;
+            padding: 0 11px;
+            border: 1px solid #e4dfd4;
+            border-radius: 5px;
+            background: #faf9f6;
+            color: #7d694a;
+            font-size: 9px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .view-customer-button:hover {
+            border-color: var(--cg-gold);
+            background: var(--cg-gold-light);
+            color: #745a32;
+        }
+
+        .table-placeholder {
+            height: 125px;
+            color: #929ba6 !important;
+            font-size: 11px !important;
+            text-align: center;
+        }
+
+        /* Pagination */
+
+        .customer-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 15px 19px;
+            border-top: 1px solid var(--cg-border);
+            background: #fff;
+        }
+
+        .pagination-info {
+            color: #818b99;
+            font-size: 10px;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pagination-controls label {
+            color: #818b99;
+            font-size: 10px;
+        }
+
+        .pagination-controls select {
+            height: 30px;
+            padding: 0 8px;
+            border: 1px solid #e8e6e0;
+            border-radius: 5px;
+            background: #fff;
+            color: var(--cg-ink);
+            font-size: 10px;
+        }
+
+        .pagination-button {
+            min-height: 30px;
+            padding: 0 11px;
+            border: 1px solid #e8e6e0;
+            border-radius: 5px;
+            background: #fff;
+            color: #667284;
+            font-size: 9px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .pagination-button:hover:not(:disabled) {
+            border-color: var(--cg-gold);
+            color: #8c7046;
+        }
+
+        .pagination-button:disabled {
+            cursor: not-allowed;
+            opacity: .4;
+        }
+
+        .dashboard-footer {
+            padding: 25px 0 5px;
+            color: #a1a49f;
+            font-size: 9px;
+            text-align: center;
+        }
+
+        /* Modal system */
+
+        body.modal-open { overflow: hidden; }
+
+        .customer-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+        }
+
+        .customer-modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(17,29,44,.68);
+            backdrop-filter: blur(4px);
+        }
+
+        .customer-modal-card {
+            position: relative;
+            z-index: 1;
+            width: min(760px,100%);
+            max-height: 88vh;
+            overflow-y: auto;
+            padding: 26px;
+            border: 1px solid rgba(197,164,109,.24);
+            border-radius: 11px;
+            background: #fff;
+            box-shadow: 0 24px 75px rgba(10,20,32,.25);
+            animation: modal-enter .2s ease;
+        }
+
+        .customer-form-card { width: min(850px,100%); }
+
+        @keyframes modal-enter {
+            from { opacity: 0; transform: translateY(10px) scale(.99); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .customer-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 21px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--cg-border);
+        }
+
+        .customer-modal-header .eyebrow {
+            display: block;
+            margin-bottom: 5px;
+            color: #a08354;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+        }
+
+        .customer-modal-header h2 {
+            color: var(--cg-ink);
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -.5px;
+        }
+
+        .modal-close-button {
+            display: grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            flex-shrink: 0;
+            border: 1px solid #ece9e2;
+            border-radius: 6px;
+            background: #faf9f6;
+            color: #7c8794;
+            font-size: 20px;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .modal-close-button:hover {
+            border-color: #e5c7c4;
+            background: #fbefed;
+            color: var(--cg-red);
+        }
+
+        .customer-detail-grid {
+            display: grid;
+            grid-template-columns: repeat(3,minmax(0,1fr));
+            gap: 11px;
+        }
+
+        .customer-detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 0;
+            padding: 12px;
+            border: 1px solid #eeece7;
+            border-radius: 7px;
+            background: #fcfbf9;
+        }
+
+        .customer-detail-item span {
+            color: #9099a4;
+            font-size: 9px;
+            font-weight: 600;
+        }
+
+        .customer-detail-item strong {
+            overflow-wrap: anywhere;
+            color: #304157;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .customer-detail-actions,
+        .customer-form-actions {
+            display: flex;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 9px;
+            margin-top: 19px;
+            padding-top: 16px;
+            border-top: 1px solid var(--cg-border);
+        }
+
+        .delete-customer-button {
+            min-height: 38px;
+            padding: 0 14px;
+            border: 1px solid #e8cfcc;
+            border-radius: 6px;
+            background: #fff5f3;
+            color: #ad5955;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .delete-customer-button:hover { background: #fbe8e5; }
+
+        /* Customer form */
+
+        .customer-form-grid {
+            display: grid;
+            grid-template-columns: repeat(3,minmax(0,1fr));
+            gap: 14px;
+        }
+
+        .customer-form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .customer-form-field label {
+            color: #667284;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .customer-form-field input,
+        .customer-form-field select {
+            width: 100%;
+            height: 39px;
+            padding: 0 10px;
+            border: 1px solid #e7e5df;
+            border-radius: 6px;
+            outline: none;
+            background: #fff;
+            color: #33445a;
+            font-size: 10px;
+            transition: .2s;
+        }
+
+        .customer-form-field input:focus,
+        .customer-form-field select:focus {
+            border-color: var(--cg-gold);
+            box-shadow: 0 0 0 3px rgba(197,164,109,.12);
+        }
+
+        .customer-form-field input:read-only {
+            background: #f3f2ef;
+            color: #87909a;
+            cursor: not-allowed;
+        }
+
+        #customer-form-error {
+            margin-top: 14px;
+            padding: 10px 12px;
+            border: 1px solid #efd4d2;
+            border-radius: 6px;
+            background: #fff4f3;
+            color: #a64e4b;
+            font-size: 10px;
+        }
+
+        .form-cancel-button {
+            min-height: 38px;
+            padding: 0 14px;
+            border: 1px solid #e7e5df;
+            border-radius: 6px;
+            background: #fff;
+            color: #697587;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .form-cancel-button:hover { background: #f6f5f1; }
+
+        /* Responsive */
+
+        @media(max-width:1100px) {
+            .dashboard-content { padding: 27px 23px; }
+            .dashboard-header { padding-right: 23px; padding-left: 23px; }
+            .customer-detail-grid,
+            .customer-form-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+        }
+
+        @media(max-width:760px) {
+            .sidebar {
+                position: static;
+                width: 100%;
+                padding: 13px 14px;
+                border-right: 0;
+                border-bottom: 1px solid rgba(255,255,255,.08);
+            }
+
+            .dashboard-layout { display: block; }
+            .sidebar-brand { margin-bottom: 14px; }
+            .sidebar-section-label,
+            .sidebar-bottom { display: none; }
+
+            .sidebar-nav {
+                display: flex;
+                gap: 5px;
+                overflow-x: auto;
+                padding-bottom: 3px;
+            }
+
+            .nav-link {
+                min-height: 36px;
+                flex-shrink: 0;
+                padding: 0 10px;
+                font-size: 10px;
+            }
+
+            .nav-link svg { width: 15px; height: 15px; }
+
+            .dashboard-main {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .dashboard-header {
+                min-height: 70px;
+                padding: 13px 17px;
+            }
+
+            .dashboard-content { padding: 22px 16px; }
+            .header-user-info { display: none; }
+
+            .customer-toolbar {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .customer-toolbar-actions {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .customer-search { width: 100%; }
+            .customer-toolbar-actions .add-customer-button { width: 100%; }
+
+            .customer-pagination {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .pagination-controls { flex-wrap: wrap; }
+        }
+
+        @media(max-width:520px) {
+            .customer-page-intro {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .directory-reference { display: none; }
+            .customer-summary-grid { gap: 9px; }
+
+            .customer-summary-card {
+                min-height: 105px;
+                padding: 14px;
+            }
+
+            .customer-summary-card strong { font-size: 23px; }
+
+            .customer-detail-grid,
+            .customer-form-grid { grid-template-columns: 1fr; }
+
+            .customer-modal { padding: 10px; }
+
+            .customer-modal-card {
+                max-height: 92vh;
+                padding: 18px;
+            }
+
+            .customer-modal-header h2 { font-size: 16px; }
+
+            .customer-detail-actions,
+            .customer-form-actions { justify-content: stretch; }
+
+            .customer-detail-actions button,
+            .customer-form-actions button { flex: 1; }
+        }
+
+        @media(max-width:370px) {
+            .customer-summary-grid { grid-template-columns: 1fr; }
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                animation-duration: .01ms !important;
+                transition-duration: .01ms !important;
+            }
+        }
+    </style>
 </head>
+
 <body class="dashboard-page">
 
 <div class="dashboard-layout">
 
+    <!-- Shared sidebar: keep identical on all authenticated pages -->
     <aside class="sidebar">
-        <div class="sidebar-brand brand">
-            <div class="brand-icon">C</div>
+
+        <div class="sidebar-brand">
+            <div class="brand-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/>
+                    <path d="m9 12 2 2 4-4"/>
+                </svg>
+            </div>
             <span>ChurnGuard<span class="brand-accent"> AI</span></span>
         </div>
 
         <div class="sidebar-section-label">WORKSPACE</div>
 
         <nav class="sidebar-nav">
+
             <a href="dashboard.html" class="nav-link">
-                <span>▦</span> Dashboard
+                <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="14" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/>
+                </svg>
+                Dashboard
             </a>
+
             <a href="customers.html" class="nav-link active">
-                <span>♙</span> Customers
+                <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="10" cy="7" r="4"/>
+                    <path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                Customers
             </a>
+
             <a href="prediction.html" class="nav-link">
-                <span>⌁</span> Churn Prediction
+                <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 17 9 11l4 4 8-9"/>
+                    <path d="M15 6h6v6"/>
+                </svg>
+                Churn Prediction
             </a>
+
             <a href="analytics.html" class="nav-link">
-                <span>▥</span> Analytics
+                <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 3v18h18"/>
+                    <path d="M18 17V9M13 17V5M8 17v-3"/>
+                </svg>
+                Analytics
             </a>
-            <a href="retention.html" class="nav-link">
-                <span>◎</span> Retention Center
+
+            <a href="retention.html" class="nav-link ">
+                <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/>
+                </svg>
+                Retention Center
             </a>
+
             <a href="reports.html" class="nav-link">
-                <span>▤</span> Reports
+                <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <path d="M14 2v6h6M8 13h8M8 17h8M8 9h2"/>
+                </svg>
+                Reports
             </a>
+
         </nav>
 
         <div class="sidebar-bottom">
+
             <div class="sidebar-user">
                 <div class="user-avatar" id="user-avatar">U</div>
+
                 <div class="user-details">
                     <strong id="sidebar-user-name">Loading...</strong>
                     <span id="sidebar-user-role">User</span>
                 </div>
             </div>
+
             <button id="logout-button" class="logout-button">
-                ↪ Sign out
+                ↪ &nbsp; Sign out
             </button>
+
         </div>
+
     </aside>
 
+    <!-- Main content -->
     <main class="dashboard-main">
 
         <header class="dashboard-header">
             <div>
-                <h1>Customers</h1>
-                <p>Manage and explore your customer database.</p>
+                <h1>Customer Directory</h1>
+                <p>Manage and explore your customer records</p>
             </div>
 
             <div class="header-user">
                 <div class="header-user-info">
                     <strong id="header-user-name">Loading...</strong>
-                    <span>ChurnGuard Workspace</span>
+                    <span>Workspace account</span>
                 </div>
-                <div class="user-avatar" id="header-avatar">U</div>
+                <div class="header-avatar" id="header-avatar">U</div>
             </div>
         </header>
 
-        <section class="dashboard-content">
+        <div class="dashboard-content">
 
-            <div class="section-heading customers-heading">
+            <!-- Page introduction -->
+            <section class="customer-page-intro">
                 <div>
-                    <h2>Customer Directory</h2>
-                    <p>Customer records imported from your connected dataset.</p>
+                    <div class="customer-eyebrow">Customer intelligence</div>
+                    <h2>Customer Management</h2>
+                    <p>Review customer profiles, monitor historical churn, and maintain your customer database.</p>
                 </div>
 
-                <span class="data-status">
-                    <span class="status-dot"></span>
-                    MySQL connected
-                </span>
-            </div>
-
-            <section class="customer-summary-grid">
-                <article class="customer-summary-card">
-                    <span>Total Customers</span>
-                    <strong id="customer-total">—</strong>
-                    <small>Records in your database</small>
-                </article>
-
-                <article class="customer-summary-card">
-                    <span>Showing Records</span>
-                    <strong id="customer-showing">—</strong>
-                    <small>On the current page</small>
-                </article>
+                <div class="directory-reference">
+                    <svg viewBox="0 0 24 24">
+                        <rect x="4" y="4" width="16" height="16" rx="2"/>
+                        <path d="M8 9h8M8 13h8M8 17h4"/>
+                    </svg>
+                    Customer directory
+                </div>
             </section>
 
-            <section class="dashboard-panel customer-table-panel">
+            <!-- Summary cards -->
+            <section class="customer-summary-grid">
+
+                <div class="customer-summary-card">
+                    <div class="summary-top">
+                        <span>Total customers</span>
+                        <div class="summary-icon">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="9" cy="8" r="3.5"/>
+                                <path d="M2.8 20c.5-3.5 2.7-5.5 6.2-5.5s5.7 2 6.2 5.5"/>
+                                <path d="M16 5.1a3.5 3.5 0 0 1 0 6.8"/>
+                                <path d="M17 14.7c2.3.6 3.6 2.3 4 5.3"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <strong id="customer-total">—</strong>
+                    <small>All customer records in your database</small>
+                </div>
+
+                <div class="customer-summary-card">
+                    <div class="summary-top">
+                        <span>Records on this page</span>
+                        <div class="summary-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M6 3h8l5 5v13H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/>
+                                <path d="M14 3v5h5M8 13h8M8 17h8"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <strong id="customer-showing">—</strong>
+                    <small>Customer records currently displayed</small>
+                </div>
+
+            </section>
+
+            <!-- Customer directory -->
+            <section class="customer-table-panel">
 
                 <div class="customer-toolbar">
                     <div>
-                        <h3>All Customers</h3>
-                        <p>Search and view your customer records.</p>
+                        <h3>Customer records</h3>
+                        <p>Search, inspect, and manage your customer information</p>
                     </div>
 
                     <div class="customer-toolbar-actions">
-                        <div class="customer-search">
-                            <span>⌕</span>
+
+                        <label class="customer-search">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="10.8" cy="10.8" r="6.8"/>
+                                <path d="m16 16 4.5 4.5"/>
+                            </svg>
                             <input
                                 type="search"
                                 id="customer-search"
-                                placeholder="Search customers..."
+                                placeholder="Search customer ID..."
                                 autocomplete="off"
+                                aria-label="Search customers"
                             >
-                        </div>
+                        </label>
 
-                        <button type="button" id="add-customer-button"
-                            class="add-customer-button">
-                            + Add Customer
+                        <button
+                            class="add-customer-button"
+                            id="add-customer-button"
+                            type="button"
+                        >
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 5v14M5 12h14"/>
+                            </svg>
+                            Add customer
                         </button>
+
                     </div>
                 </div>
 
-                <div id="customer-message" class="customer-message" hidden></div>
+                <div class="customer-message" id="customer-message" hidden></div>
 
                 <div class="customer-table-wrapper">
                     <table class="customer-table">
@@ -136,11 +1311,12 @@
                                 <th>Gender</th>
                                 <th>Tenure</th>
                                 <th>Contract</th>
-                                <th>Monthly Charges</th>
-                                <th>Churn Status</th>
+                                <th>Monthly charges</th>
+                                <th>Churn status</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
+
                         <tbody id="customer-table-body">
                             <tr>
                                 <td colspan="7" class="table-placeholder">
@@ -151,25 +1327,42 @@
                     </table>
                 </div>
 
+                <!-- Pagination -->
                 <div class="customer-pagination">
+
                     <div class="pagination-info" id="pagination-info">
                         Loading records...
                     </div>
 
                     <div class="pagination-controls">
-                        <label for="page-size">Rows:</label>
+
+                        <label for="page-size">Rows</label>
+
                         <select id="page-size">
                             <option value="10" selected>10</option>
-                            <option value="20">20</option>
+                            <option value="25">25</option>
                             <option value="50">50</option>
+                            <option value="100">100</option>
                         </select>
 
-                        <button id="previous-page" class="pagination-button" disabled>
+                        <button
+                            class="pagination-button"
+                            id="previous-page"
+                            type="button"
+                            disabled
+                        >
                             Previous
                         </button>
-                        <button id="next-page" class="pagination-button" disabled>
+
+                        <button
+                            class="pagination-button"
+                            id="next-page"
+                            type="button"
+                            disabled
+                        >
                             Next
                         </button>
+
                     </div>
                 </div>
 
@@ -179,62 +1372,109 @@
                 ChurnGuard AI · Customer Intelligence Platform
             </footer>
 
-        </section>
+        </div>
     </main>
+
 </div>
 
-<div id="customer-modal" class="customer-modal" hidden>
+<!-- Customer details modal -->
+<div class="customer-modal" id="customer-modal" hidden>
+
     <div class="customer-modal-backdrop" id="modal-backdrop"></div>
 
-    <section class="customer-modal-card" role="dialog" aria-modal="true"
-        aria-labelledby="modal-customer-title">
+    <div
+        class="customer-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="customer-details-title"
+    >
 
         <div class="customer-modal-header">
             <div>
-                <span class="eyebrow">CUSTOMER PROFILE</span>
-                <h2 id="modal-customer-title">Customer Details</h2>
+                <div class="eyebrow">Customer profile</div>
+                <h2 id="customer-details-title">Customer details</h2>
             </div>
-            <button type="button" id="close-customer-modal"
-                class="modal-close-button" aria-label="Close">×</button>
+
+            <button
+                class="modal-close-button"
+                id="close-customer-modal"
+                type="button"
+                aria-label="Close customer details"
+            >
+                &times;
+            </button>
         </div>
 
-        <div id="customer-details-content" class="customer-details-content">
+        <div id="customer-details-content">
             Loading customer details...
         </div>
-    </section>
+
+    </div>
 </div>
 
-<div id="customer-form-modal" class="customer-modal" hidden>
+<!-- Add / edit customer modal -->
+<div class="customer-modal" id="customer-form-modal" hidden>
+
     <div class="customer-modal-backdrop" id="form-modal-backdrop"></div>
 
-    <section class="customer-modal-card customer-form-card"
-        role="dialog" aria-modal="true" aria-labelledby="customer-form-title">
+    <div
+        class="customer-modal-card customer-form-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="customer-form-title"
+    >
 
         <div class="customer-modal-header">
             <div>
-                <span class="eyebrow">CUSTOMER MANAGEMENT</span>
+                <div class="eyebrow">Customer records</div>
                 <h2 id="customer-form-title">Add New Customer</h2>
             </div>
 
-            <button type="button" id="close-customer-form"
-                class="modal-close-button" aria-label="Close">×</button>
+            <button
+                class="modal-close-button"
+                id="close-customer-form"
+                type="button"
+                aria-label="Close customer form"
+            >
+                &times;
+            </button>
         </div>
 
         <form id="customer-form">
-            <div id="customer-form-fields" class="customer-form-grid"></div>
 
-            <div id="customer-form-error" class="customer-message" hidden></div>
+            <div class="customer-form-grid" id="customer-form-fields">
+                <!-- Fields are generated by customers.js -->
+            </div>
+
+            <div id="customer-form-error" hidden></div>
 
             <div class="customer-form-actions">
-                <button type="button" id="cancel-customer-form"
-                    class="form-cancel-button">Cancel</button>
 
-                <button type="submit" id="save-customer-button"
-                    class="add-customer-button">Save Customer</button>
+                <button
+                    class="form-cancel-button"
+                    id="cancel-customer-form"
+                    type="button"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    class="add-customer-button"
+                    id="save-customer-button"
+                    type="submit"
+                >
+                    Save Customer
+                </button>
+
             </div>
+
         </form>
-    </section>
+
+    </div>
 </div>
+
+<script src="../js/api.js"></script>
+<script src="../js/customers.js"></script>
 
 </body>
 </html>

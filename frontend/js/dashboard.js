@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // -----------------------------------------
-    // ELEMENTS
+    // ELEMENTS & CONFIGURATION
     // -----------------------------------------
 
     const numberFormat = new Intl.NumberFormat("en-US");
@@ -18,8 +18,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const churnRateElement = document.getElementById("churn-rate");
     const highRiskElement = document.getElementById("high-risk-customers");
 
+    const churnCanvas = document.getElementById("churn-distribution-chart");
     const riskCanvas = document.getElementById("risk-distribution-chart");
+
     const riskEmptyState = document.getElementById("risk-empty-state");
+    const riskSummary = document.getElementById("risk-summary");
 
     const lowRiskElement = document.getElementById("low-risk-count");
     const mediumRiskElement = document.getElementById("medium-risk-count");
@@ -29,7 +32,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     const activityContent = document.getElementById("activity-content");
     const activityBody = document.getElementById("recent-predictions-body");
 
+    let churnChart = null;
     let riskChart = null;
+
+    // -----------------------------------------
+    // CHART DEFAULTS
+    // -----------------------------------------
+
+    if (window.Chart) {
+        Chart.defaults.font.family = "'Manrope', sans-serif";
+        Chart.defaults.font.size = 10;
+        Chart.defaults.color = "#778294";
+
+        Chart.defaults.plugins.tooltip.backgroundColor = "#1d4ed8";
+        Chart.defaults.plugins.tooltip.titleColor = "#ffffff";
+        Chart.defaults.plugins.tooltip.bodyColor = "#e8edf4";
+        Chart.defaults.plugins.tooltip.padding = 11;
+        Chart.defaults.plugins.tooltip.cornerRadius = 5;
+        Chart.defaults.plugins.tooltip.displayColors = true;
+    }
 
     // -----------------------------------------
     // AUTHENTICATION
@@ -38,6 +59,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
         const user = await window.ChurnGuardAPI.getCurrentUser(token);
 
+        const fullName = user.full_name || "User";
+
         const nameElements = [
             document.getElementById("sidebar-user-name"),
             document.getElementById("header-user-name")
@@ -45,17 +68,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         nameElements.forEach(element => {
             if (element) {
-                element.textContent = user.full_name;
+                element.textContent = fullName;
             }
         });
 
         const roleElement = document.getElementById("sidebar-user-role");
 
         if (roleElement) {
-            roleElement.textContent = user.role;
+            roleElement.textContent = user.role || "User";
         }
 
-        const initial = user.full_name.charAt(0).toUpperCase();
+        const initial = fullName.charAt(0).toUpperCase();
 
         const avatar = document.getElementById("user-avatar");
 
@@ -68,6 +91,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
     } catch (error) {
+        console.error("Authentication error:", error);
+
         localStorage.removeItem("churnguard_access_token");
         localStorage.removeItem("churnguard_user");
 
@@ -97,36 +122,34 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
         const stats = await window.ChurnGuardAPI.getCustomerStats(token);
 
+        const totalCustomers = Number(stats.total_customers) || 0;
+        const churnedCustomers = Number(stats.churned_customers) || 0;
+        const retainedCustomers = Number(stats.retained_customers) || 0;
+
         if (totalElement) {
-            totalElement.textContent = numberFormat.format(
-                stats.total_customers
-            );
+            totalElement.textContent = numberFormat.format(totalCustomers);
         }
 
         if (churnedElement) {
-            churnedElement.textContent = numberFormat.format(
-                stats.churned_customers
-            );
+            churnedElement.textContent = numberFormat.format(churnedCustomers);
         }
 
         if (churnRateElement) {
             churnRateElement.textContent = `${stats.churn_rate}%`;
         }
 
-        // Customer churn distribution chart
-
-        const churnCanvas = document.getElementById(
-            "churn-distribution-chart"
-        );
+        // -----------------------------------------
+        // CHART 1: CUSTOMER CHURN DISTRIBUTION
+        // Doughnut chart
+        // -----------------------------------------
 
         if (churnCanvas && window.Chart) {
-            const existingChart = Chart.getChart(churnCanvas);
 
-            if (existingChart) {
-                existingChart.destroy();
+            if (churnChart) {
+                churnChart.destroy();
             }
 
-            new Chart(churnCanvas, {
+            churnChart = new Chart(churnCanvas, {
                 type: "doughnut",
 
                 data: {
@@ -137,17 +160,25 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                     datasets: [{
                         data: [
-                            stats.retained_customers,
-                            stats.churned_customers
+                            retainedCustomers,
+                            churnedCustomers
                         ],
 
                         backgroundColor: [
-                            "#2563eb",
-                            "#f59e0b"
+                            "#506F8F",
+                            "#C5A46D"
                         ],
 
-                        borderWidth: 0,
-                        hoverOffset: 5
+                        hoverBackgroundColor: [
+                            "#405D7B",
+                            "#B38F58"
+                        ],
+
+                        borderColor: "#ffffff",
+                        borderWidth: 4,
+                        hoverOffset: 7,
+                        borderRadius: 3,
+                        spacing: 2
                     }]
                 },
 
@@ -155,27 +186,50 @@ document.addEventListener("DOMContentLoaded", async () => {
                     responsive: true,
                     maintainAspectRatio: false,
 
-                    cutout: "68%",
+                    cutout: "72%",
+                    rotation: -90,
+
+                    animation: {
+                        duration: 900,
+                        easing: "easeOutQuart"
+                    },
+
+                    interaction: {
+                        intersect: false
+                    },
 
                     plugins: {
                         legend: {
-                            position: "bottom"
+                            position: "bottom",
+
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: "circle",
+                                boxWidth: 8,
+                                boxHeight: 8,
+                                padding: 22,
+
+                                font: {
+                                    family: "Manrope",
+                                    size: 10,
+                                    weight: "600"
+                                }
+                            }
                         },
 
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    const value = context.raw || 0;
+                                    const value = Number(context.raw) || 0;
 
                                     const total =
-                                        stats.retained_customers +
-                                        stats.churned_customers;
+                                        retainedCustomers + churnedCustomers;
 
                                     const percentage = total
                                         ? ((value / total) * 100).toFixed(1)
-                                        : 0;
+                                        : "0.0";
 
-                                    return `${context.label}: ${numberFormat.format(value)} (${percentage}%)`;
+                                    return ` ${numberFormat.format(value)} customers (${percentage}%)`;
                                 }
                             }
                         }
@@ -203,14 +257,21 @@ document.addEventListener("DOMContentLoaded", async () => {
             High: 0
         };
 
+        // Normalize risk levels from API response.
+
         riskData.forEach(item => {
-            if (Object.prototype.hasOwnProperty.call(
-                riskCounts,
-                item.risk_level
-            )) {
-                riskCounts[item.risk_level] = Number(
-                    item.customer_count || 0
-                );
+            const level = String(item.risk_level || "")
+                .trim()
+                .toLowerCase();
+
+            const count = Number(item.customer_count) || 0;
+
+            if (level === "low") {
+                riskCounts.Low = count;
+            } else if (level === "medium") {
+                riskCounts.Medium = count;
+            } else if (level === "high") {
+                riskCounts.High = count;
             }
         });
 
@@ -219,33 +280,39 @@ document.addEventListener("DOMContentLoaded", async () => {
             riskCounts.Medium +
             riskCounts.High;
 
+        // -----------------------------------------
+        // UPDATE RISK SUMMARY
+        // -----------------------------------------
+
         if (lowRiskElement) {
-            lowRiskElement.textContent = numberFormat.format(
-                riskCounts.Low
-            );
+            lowRiskElement.textContent = numberFormat.format(riskCounts.Low);
         }
 
         if (mediumRiskElement) {
-            mediumRiskElement.textContent = numberFormat.format(
-                riskCounts.Medium
-            );
+            mediumRiskElement.textContent = numberFormat.format(riskCounts.Medium);
         }
 
         if (highRiskCountElement) {
-            highRiskCountElement.textContent = numberFormat.format(
-                riskCounts.High
-            );
+            highRiskCountElement.textContent = numberFormat.format(riskCounts.High);
         }
 
         if (highRiskElement) {
-            highRiskElement.textContent = numberFormat.format(
-                riskCounts.High
-            );
+            highRiskElement.textContent = numberFormat.format(riskCounts.High);
         }
 
+        // -----------------------------------------
+        // CHART 2: CUSTOMER RISK OVERVIEW
+        // Horizontal bar chart
+        // -----------------------------------------
+
         if (riskCanvas && totalRiskCustomers > 0 && window.Chart) {
+
             if (riskEmptyState) {
                 riskEmptyState.hidden = true;
+            }
+
+            if (riskSummary) {
+                riskSummary.hidden = false;
             }
 
             riskCanvas.hidden = false;
@@ -255,7 +322,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
             riskChart = new Chart(riskCanvas, {
-                type: "doughnut",
+                type: "bar",
 
                 data: {
                     labels: [
@@ -265,6 +332,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                     ],
 
                     datasets: [{
+                        label: "Customers",
+
                         data: [
                             riskCounts.Low,
                             riskCounts.Medium,
@@ -272,36 +341,113 @@ document.addEventListener("DOMContentLoaded", async () => {
                         ],
 
                         backgroundColor: [
-                            "#22c55e",
-                            "#f59e0b",
-                            "#ef4444"
+                            "#6D9C83",
+                            "#C69B5F",
+                            "#BD6B6B"
                         ],
 
-                        borderWidth: 0,
-                        hoverOffset: 6
+                        hoverBackgroundColor: [
+                            "#57866D",
+                            "#AD8149",
+                            "#A95656"
+                        ],
+
+                        borderRadius: 4,
+                        borderSkipped: false,
+                        barThickness: 19,
+                        maxBarThickness: 22
                     }]
                 },
 
                 options: {
+                    indexAxis: "y",
+
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: "65%",
+
+                    animation: {
+                        duration: 850,
+                        easing: "easeOutQuart"
+                    },
 
                     plugins: {
                         legend: {
-                            position: "bottom"
+                            display: false
                         },
 
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    const value = context.raw || 0;
+                                    const value = Number(context.raw) || 0;
 
                                     const percentage = totalRiskCustomers
                                         ? ((value / totalRiskCustomers) * 100).toFixed(1)
-                                        : 0;
+                                        : "0.0";
 
-                                    return `${context.label}: ${value} (${percentage}%)`;
+                                    return ` ${numberFormat.format(value)} customers (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+
+                            border: {
+                                display: false
+                            },
+
+                            grid: {
+                                color: "#eeece7",
+                                drawTicks: false
+                            },
+
+                            ticks: {
+                                precision: 0,
+                                padding: 8,
+
+                                font: {
+                                    family: "Manrope",
+                                    size: 9
+                                }
+                            },
+
+                            title: {
+                                display: true,
+                                text: "Number of customers",
+
+                                color: "#8993A1",
+
+                                font: {
+                                    family: "Manrope",
+                                    size: 9,
+                                    weight: "600"
+                                },
+
+                                padding: {
+                                    top: 8
+                                }
+                            }
+                        },
+
+                        y: {
+                            border: {
+                                display: false
+                            },
+
+                            grid: {
+                                display: false
+                            },
+
+                            ticks: {
+                                color: "#45536A",
+                                padding: 9,
+
+                                font: {
+                                    family: "Manrope",
+                                    size: 10,
+                                    weight: "700"
                                 }
                             }
                         }
@@ -309,8 +455,15 @@ document.addEventListener("DOMContentLoaded", async () => {
                 }
             });
 
-        } else if (riskEmptyState) {
-            riskEmptyState.hidden = false;
+        } else {
+
+            if (riskEmptyState) {
+                riskEmptyState.hidden = false;
+            }
+
+            if (riskSummary) {
+                riskSummary.hidden = true;
+            }
 
             if (riskCanvas) {
                 riskCanvas.hidden = true;
@@ -322,6 +475,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (riskEmptyState) {
             riskEmptyState.hidden = false;
+        }
+
+        if (riskSummary) {
+            riskSummary.hidden = true;
+        }
+
+        if (riskCanvas) {
+            riskCanvas.hidden = true;
         }
     }
 
@@ -338,6 +499,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const predictions = response.predictions || [];
 
         if (!predictions.length) {
+
             if (activityEmpty) {
                 activityEmpty.hidden = false;
             }
@@ -413,6 +575,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             activityEmpty.hidden = false;
             activityEmpty.textContent =
                 "Unable to load recent prediction activity.";
+        }
+
+        if (activityContent) {
+            activityContent.hidden = true;
         }
     }
 });
